@@ -40,6 +40,10 @@ final class CoreTests: XCTestCase {
         let wrapper = try directory("wrapper/Piece.pkg/Payload", in: root)
         _ = try directory("Alpha/Samples", in: wrapper); _ = try directory("Beta/Sounds", in: wrapper)
         XCTAssertEqual(try LibraryRootDetector.roots(in: root.appendingPathComponent("wrapper"), packageName: "Test Library.pkg").count, 2)
+        let systemWrapper = try directory("system/Component.pkg/Contents/Payload/Library/Application Support/Native Instruments/Deep Product/PAResources", in: root)
+        let deep = try LibraryRootDetector.roots(in: root.appendingPathComponent("system"), packageName: "Deep Product Library.pkg")
+        XCTAssertEqual(deep.map(\.lastPathComponent), ["Deep Product"])
+        XCTAssertTrue(FileManager.default.fileExists(atPath: systemWrapper.path))
     }
     func testMetadataOnly() throws {
         let root = try fixture(); _ = try directory("Contents/Resources/Service Centre", in: root)

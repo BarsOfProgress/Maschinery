@@ -10,7 +10,8 @@ import MaschineCore
     var body: some Scene {
         WindowGroup {
             MainView().environmentObject(model).preferredColorScheme(.dark).frame(minWidth: 1000, minHeight: 660)
-                .onAppear { delegate.model = model }
+                .onAppear { delegate.model = model; model.recover(); model.checkHelper() }
+                .sheet(isPresented: $model.showingMaintenance) { MaintenanceReview().environmentObject(model) }
         }.windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(after: .newItem) {
@@ -19,7 +20,7 @@ import MaschineCore
                 Button("Bulk XML Import…") { model.choose(xml: true) }
             }
             CommandGroup(replacing: .appInfo) { Button("About Maschine Machine") {
-                NSApplication.shared.orderFrontStandardAboutPanel(options: [.applicationName: "Maschine Machine", .applicationVersion: "0.1 Development", .credits: NSAttributedString(string: "Independent utility. Not affiliated with or endorsed by Native Instruments.\nDevelopment preview — registered installation is unavailable.")])
+                NSApplication.shared.orderFrontStandardAboutPanel(options: [.applicationName: "Maschine Machine", .applicationVersion: "1.0 Development", .credits: NSAttributedString(string: "Independent utility. Not affiliated with or endorsed by Native Instruments.\nFull Install uses an approved, signed privileged helper.")])
             } }
             CommandGroup(after: .windowArrangement) { Button("Logs") { model.page = "Logs" }.keyboardShortcut("l") }
         }
@@ -30,9 +31,16 @@ import MaschineCore
     weak var model: AppModel?
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let model, model.busy else { return .terminateNow }
-        let alert = NSAlert(); alert.messageText = "An operation is active"; alert.informativeText = "Continue working, or cancel safely before quitting. Wait for the operation to finish cancelling, then quit again."
-        alert.addButton(withTitle: "Continue Operation"); alert.addButton(withTitle: "Cancel Safely")
-        if alert.runModal() == .alertSecondButtonReturn { model.cancel() }
+        let alert = NSAlert(); alert.messageText = "An operation is active"; alert.informativeText = "Continue working, or wait for safe cancellation and then quit. Verified installations remain installed."
+        alert.addButton(withTitle: "Continue Operation"); alert.addButton(withTitle: "Cancel Safely and Quit")
+        if alert.runModal() == .alertSecondButtonReturn {
+            model.cancel()
+            Task { @MainActor in
+                while model.busy { try? await Task.sleep(for: .milliseconds(100)) }
+                sender.reply(toApplicationShouldTerminate: true)
+            }
+            return .terminateLater
+        }
         return .terminateCancel
     }
 }
@@ -51,7 +59,7 @@ struct MainView: View {
                     }.buttonStyle(.plain).padding(.bottom, 4)
                 }
                 Spacer()
-                Text("DEVELOPMENT PREVIEW\n0.1 · Extract Only available").font(.system(size: 10)).foregroundStyle(.secondary).lineSpacing(5).padding(.bottom, 22)
+                Text("MASCHINE MACHINE\n1.0 · Development").font(.system(size: 10)).foregroundStyle(.secondary).lineSpacing(5).padding(.bottom, 22)
             }.padding(.horizontal, 20).frame(width: 190).background(panel)
             Rectangle().fill(Color(white: 0.18)).frame(width: 1)
             VStack(spacing: 0) {
@@ -96,14 +104,15 @@ struct InstallView: View {
             HStack {
                 Text("\(model.candidates.count) EXPANSIONS").font(.system(size: 11, weight: .bold)).tracking(1)
                 Spacer()
-                Picker("Filter", selection: $model.filter) { ForEach(["All", "Ready", "Warning", "Conflict", "Failed", "Installed"], id: \.self) { Text($0) } }.frame(width: 150)
+                Picker("Filter", selection: $model.filter) { ForEach(["All", "Ready", "Warning", "Conflict", "Failed", "Existing", "Installed", "Extracted"], id: \.self) { Text($0) } }.frame(width: 150)
+                Picker("Sort", selection: $model.sort) { ForEach(["Name", "Size", "State"], id: \.self) { Text($0) } }.frame(width: 110)
                 TextField("Search expansions", text: $model.search).frame(width: 170)
             }
             if model.candidates.isEmpty {
                 VStack(alignment: .leading, spacing: 14) {
                     Text("YOUR SOURCES STAY YOURS").font(.system(size: 12, weight: .bold)).tracking(1)
-                    Text("Analyse first. Review every expansion. Copy and verify before committing. Original files are always preserved in this development build.").foregroundStyle(.secondary).font(.system(size: 13))
-                    Label("Registered installation requires a signed helper and is not available yet.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary)
+                    Text("Analyse first. Review every expansion. Copy and verify before committing. Original files are preserved unless you enable post-verification Trash.").foregroundStyle(.secondary).font(.system(size: 13))
+                    Label("Full Install requires the signed helper. Enable it in Settings.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary)
                 }.padding(24).frame(maxWidth: .infinity, alignment: .leading).background(panel)
                 Spacer()
             } else {
@@ -115,6 +124,9 @@ struct InstallView: View {
                     Picker("Mode", selection: $model.mode) { ForEach(OperationMode.allCases, id: \.self) { Text($0.rawValue) } }.frame(width: 165)
                     Button("Start Selected") { model.install() }.buttonStyle(.borderedProminent).disabled(model.selected.isEmpty)
                 }
+            }
+            if model.report != nil {
+                HStack { Button("Save Report…") { model.saveReport() }; Button("Retry Failed") { model.retryFailed() }; Spacer(); Text(model.report!.cleanup.joined(separator: " · ")).font(.caption).foregroundStyle(.secondary).lineLimit(2) }
             }
             HStack { Text("DESTINATION").font(.system(size: 9, weight: .bold)).foregroundStyle(.secondary); Text(model.destination).font(.system(size: 11, design: .monospaced)).lineLimit(1); Spacer(); Button("Choose…") { model.chooseDestination() } }
         }.padding(24).disabled(model.busy)
@@ -142,9 +154,10 @@ struct CandidateRow: View {
                 Divider()
                 ForEach(candidate.sources) { source in Button(source.url.path) { NSWorkspace.shared.activateFileViewerSelecting([source.url]) }.buttonStyle(.link).font(.caption) }
                 ForEach(Array(candidate.warnings.enumerated()), id: \.offset) { _, warning in Label(warning, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.secondary) }
+                if candidate.policy == .replace { Text("Replace swaps the entire destination. The old directory is backed up until verification, then removed.").font(.caption).foregroundStyle(.orange) }
                 HStack {
                     Picker("Existing content", selection: Binding(get: { candidate.policy }, set: { policy in if let i = model.candidates.firstIndex(where: { $0.id == candidate.id }) { model.candidates[i].policy = policy } })) { ForEach(ConflictPolicy.allCases, id: \.self) { Text($0.rawValue.capitalized) } }.frame(width: 230)
-                    Button("Choose XML…") { model.choose(xml: true) }
+                    Button("Choose XML…") { model.chooseXML(for: candidate.id) }
                     Button("Destination…") {
                         let p = NSOpenPanel(); p.canChooseFiles = false; p.canChooseDirectories = true
                         if p.runModal() == .OK, let root = p.url, root.path != "/", let i = model.candidates.firstIndex(where: { $0.id == candidate.id }) { model.candidates[i].destination = root.appendingPathComponent(candidate.name) }

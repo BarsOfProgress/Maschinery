@@ -1,8 +1,8 @@
 import Foundation
 
 public enum SafeTree {
-    public static func children(_ root: URL) throws -> [URL] {
-        try FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: [.skipsHiddenFiles]).sorted { $0.path < $1.path }
+    public static func children(_ root: URL, includeHidden: Bool = false) throws -> [URL] {
+        try FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: includeHidden ? [] : [.skipsHiddenFiles]).sorted { $0.path < $1.path }
     }
     public static func isDirectory(_ url: URL) -> Bool { (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
     public static func validate(_ url: URL) throws {
@@ -13,21 +13,21 @@ public enum SafeTree {
             path.deleteLastPathComponent()
         }
     }
-    public static func walk(_ root: URL, visit: (URL) throws -> Bool) throws {
+    public static func walk(_ root: URL, includeHidden: Bool = false, visit: (URL) throws -> Bool) throws {
         try Task.checkCancellation(); try validate(root)
         guard try visit(root), isDirectory(root) else { return }
-        for child in try children(root) { try walk(child, visit: visit) }
+        for child in try children(root, includeHidden: includeHidden) { try walk(child, includeHidden: includeHidden, visit: visit) }
     }
     public static func byteCount(_ root: URL) throws -> Int64 {
         var bytes: Int64 = 0
-        try walk(root) { url in
+        try walk(root, includeHidden: true) { url in
             if !isDirectory(url) { bytes += Int64(try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) }
             return true
         }; return bytes
     }
 }
 public enum SourceDiscoveryService {
-    public static func discover(_ urls: [URL]) throws -> [SourceArtifact] {
+    public static func discover(_ urls: [URL], onError: ((URL, Error) -> Void)? = nil) throws -> [SourceArtifact] {
         var result: [SourceArtifact] = []; var seen = Set<String>()
         func scan(_ url: URL) throws {
             try Task.checkCancellation(); try SafeTree.validate(url)
@@ -39,21 +39,29 @@ public enum SourceDiscoveryService {
             }
             guard SafeTree.isDirectory(url) else { return }
             if LibraryRootDetector.isRoot(url) { result.append(SourceArtifact(url: url, type: .folder)); return }
-            for child in try SafeTree.children(url) { try scan(child) }
+            for child in try SafeTree.children(url) {
+                do { try scan(child) }
+                catch is CancellationError { throw CancellationError() }
+                catch { if let onError { onError(child, error) } else { throw error } }
+            }
         }
-        for url in urls { try scan(url) }; return result
+        for url in urls {
+            do { try scan(url) }
+            catch is CancellationError { throw CancellationError() }
+            catch { if let onError { onError(url, error) } else { throw error } }
+        }; return result
     }
 }
 public enum LibraryRootDetector {
     static let ignored: Set<String> = ["scripts", "resources", "contents", "packageinfo", "__macosx", "service center", "service centre"]
     public static func isRoot(_ url: URL) -> Bool {
-        SafeTree.isDirectory(url) && !ignored.contains(url.lastPathComponent.lowercased()) && (url.lastPathComponent.lowercased().contains("library") && url.pathExtension.lowercased() != "pkg" || SafeTree.isDirectory(url.appendingPathComponent("PAResources")))
+        SafeTree.isDirectory(url) && !ignored.contains(url.lastPathComponent.lowercased()) && (url.lastPathComponent.lowercased() != "library" && url.lastPathComponent.lowercased().contains("library") && url.pathExtension.lowercased() != "pkg" || SafeTree.isDirectory(url.appendingPathComponent("PAResources")))
     }
     public static func roots(in root: URL, packageName: String? = nil) throws -> [URL] {
         var found: [URL] = []
         try SafeTree.walk(root) { url in
             if isRoot(url) { found.append(url); return false }
-            return !ignored.contains(url.lastPathComponent.lowercased())
+            return !["scripts", "__macosx"].contains(url.lastPathComponent.lowercased())
         }
         if found.isEmpty, packageName?.lowercased().contains("library") == true {
             func unwrap(_ url: URL) throws {

@@ -1,17 +1,18 @@
 import Foundation
-public enum LibraryIssue: String, Codable, Sendable { case missingContent = "Missing Content", unreadable = "Permission Problem", missingXML = "Missing XML", missingArtwork = "Missing Artwork", missingResources = "Missing PAResources", registration = "Registration Problem" }
+public enum LibraryIssue: String, Codable, Sendable { case missingContent = "Missing Content", unreadable = "Permission Problem", missingXML = "Missing XML", missingArtwork = "Missing Artwork", missingResources = "Missing PAResources", registration = "Registration Problem", duplicate = "Conflicting Registration" }
 public struct InstalledLibrary: Identifiable, Sendable {
     public let id: URL
     public let name: String
     public let content: URL?
     public let version: String?
     public let artwork: URL?
-    public let issues: [LibraryIssue]
-    public var critical: Bool { issues.contains(.missingContent) || issues.contains(.unreadable) || issues.contains(.registration) }
+    public var issues: [LibraryIssue]
+    public var serviceCenter: URL = URL(fileURLWithPath: "/Library/Application Support/Native Instruments/Service Center")
+    public var critical: Bool { issues.contains(.missingContent) || issues.contains(.unreadable) || issues.contains(.registration) || issues.contains(.duplicate) }
 }
 public enum ExistingLibraryService {
     public static func audit(preferences: URL = URL(fileURLWithPath: "/Library/Preferences"), serviceCenter: URL = URL(fileURLWithPath: "/Library/Application Support/Native Instruments/Service Center"), resources: URL = URL(fileURLWithPath: "/Users/Shared/NI Resources/image")) throws -> [InstalledLibrary] {
-        try SafeTree.children(preferences).filter { $0.lastPathComponent.hasPrefix("com.native-instruments.") && $0.pathExtension == "plist" }.map { plist in
+        var libraries = try SafeTree.children(preferences).filter { $0.lastPathComponent.hasPrefix("com.native-instruments.") && $0.pathExtension == "plist" }.map { plist in
             try Task.checkCancellation()
             let name = String(plist.deletingPathExtension().lastPathComponent.dropFirst("com.native-instruments.".count))
             var issues: [LibraryIssue] = []; var content: URL?; var version: String?
@@ -24,14 +25,35 @@ public enum ExistingLibraryService {
                 if !SafeTree.isDirectory(content) { issues.append(.missingContent) }
                 else {
                     if !FileManager.default.isReadableFile(atPath: content.path) { issues.append(.unreadable) }
+                    do {
+                        try SafeTree.walk(content) { url in
+                            let mode = (try FileManager.default.attributesOfItem(atPath: url.path)[.posixPermissions] as? NSNumber)?.intValue ?? 0
+                            let required = SafeTree.isDirectory(url) ? 0o500 : 0o400
+                            if mode & required != required && !issues.contains(.unreadable) { issues.append(.unreadable) }
+                            return true
+                        }
+                    } catch { if !issues.contains(.unreadable) { issues.append(.unreadable) } }
                     if !SafeTree.isDirectory(content.appendingPathComponent("PAResources")) { issues.append(.missingResources) }
                 }
             }
-            if !FileManager.default.isReadableFile(atPath: serviceCenter.appendingPathComponent(name + ".xml").path) { issues.append(.missingXML) }
+            let xml = serviceCenter.appendingPathComponent(name + ".xml")
+            if !FileManager.default.isReadableFile(atPath: xml.path) { issues.append(.missingXML) }
+            else {
+                do {
+                    let records = try MetadataXML.read(xml, source: .embedded)
+                    if !records.isEmpty && !records.contains(where: { ProductName.key($0.name) == ProductName.key(name) }) { issues.append(.registration) }
+                } catch { issues.append(.registration) }
+            }
             let artwork = try? ArtworkService.find(in: content ?? URL(fileURLWithPath: "/nonexistent"))
             let installedArtwork = resources.appendingPathComponent(name).appendingPathComponent("MST_artwork.png")
             if !FileManager.default.isReadableFile(atPath: installedArtwork.path) { issues.append(.missingArtwork) }
-            return InstalledLibrary(id: plist, name: name, content: content, version: version, artwork: artwork, issues: issues)
+            return InstalledLibrary(id: plist, name: name, content: content, version: version, artwork: artwork, issues: issues, serviceCenter: serviceCenter)
         }.sorted { $0.name < $1.name }
+        let identities = Dictionary(grouping: libraries, by: { ProductName.key($0.name) })
+        let paths = Dictionary(grouping: libraries.filter { $0.content != nil }, by: { $0.content!.standardizedFileURL.path })
+        for i in libraries.indices {
+            if identities[ProductName.key(libraries[i].name), default: []].count > 1 || libraries[i].content.map({ paths[$0.standardizedFileURL.path, default: []].count > 1 }) == true { libraries[i].issues.append(.duplicate) }
+        }
+        return libraries
     }
 }

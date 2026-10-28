@@ -1,85 +1,72 @@
 # Maschine Machine
 
-Native macOS 14+ SwiftUI library companion. Independent utility; not affiliated with or endorsed by Native Instruments.
+Native SwiftUI companion for bulk Maschine library installation, extraction, auditing, repair and relocation. macOS 14+, Universal 2. Independent utility; not affiliated with or endorsed by Native Instruments.
 
-**Status: development foundation, not v1 or a production installer.** The supplied legacy implementation and Maschine screenshot have been reviewed. See [implementation plan](docs/PLAN.md) and [compatibility inventory](docs/COMPATIBILITY.md).
+## Development build
 
-## Build and run
+The Full Install implementation is enabled. The app embeds an SMAppService launch daemon and uses authenticated XPC for NI system registration. **The supplied ad-hoc build cannot authorize that daemon.** Sign both executables with your Apple team and approve the helper in System Settings to perform system installation or maintenance. No root GUI, Terminal password prompt or sudo fallback exists. See [exact signing instructions](docs/SIGNING.md).
 
-Requires Xcode 16+ with Swift 6 and a macOS SDK. Developed using Xcode 27.1. No third-party libraries or runtime dependencies.
+Analysis, Extract Only, artwork, XML import, offline mode, audit and logs work without helper authorization. Registered installs and maintenance are tested against isolated filesystem roots using exactly the registration engine linked into the daemon. System authorization and root-owned filesystem behavior still require acceptance on a signed build; they are not claimed as tested here.
 
-Open `MaschineMachine.xcodeproj` (native app and core targets), or `Package.swift`, in Xcode and run the MaschineMachine executable scheme, or:
+Final development bundle: `dist/Maschine Machine.app`.
+
+## Build and test
+
+Requires current Xcode and Swift 6. No Python, Homebrew or downloadable runtime is required by the application. The archive fallback links Apple's system libarchive. `scripts/sync-xcode.py` is an optional developer-only project generator; the generated project is committed.
 
 ```sh
 swift build --disable-sandbox
-swift run --disable-sandbox MaschineMachine
-swift test --disable-sandbox
+scripts/test-native.sh      # XCTest only; rejects zero-test runs
+scripts/test-intel.sh       # x86_64 XCTest under Rosetta on Apple Silicon
+scripts/build-app.sh        # arm64 + x86_64 app AND helper, ad-hoc signing by default
+open 'dist/Maschine Machine.app'
 ```
 
-`--disable-sandbox` disables SwiftPM's build subprocess sandbox, not app safety checks. It is necessary in the restricted development environment; normal machines may omit it.
+Open `MaschineMachine.xcodeproj` for native app, core and helper targets. `Package.swift` also builds all executables and tests. Restricted environments may require `OTHER_SWIFT_FLAGS=-disable-sandbox` for compiler macro subprocesses. This is a build-tool setting, not a runtime security bypass. The bundle script uses the legacy SwiftPM native backend because this host denies the newer backend's dsymutil subprocess.
 
-## Available behavior
+## Workflows
 
-- Native black/charcoal sidebar UI with Install, Libraries, Logs and Settings.
-- Multi-source picker and Finder file drop; asynchronous analysis and cancellation propagation.
-- ISO read-only attachment with plist mount information; staged loose payloads and XML before detachment.
-- pkgutil expansion, bundle fallback and logged xar fallback with member path screening.
-- Batch-wide embedded XML collection; multipart normalization and grouping; explicit XML override and ambiguity detection.
-- Structured XML parsing, DTD/entity rejection, ProductHints actor cache and offline network gate.
-- Library root and artwork discovery; background thumbnail decoding.
-- Queue selection, filtering, diagnostics, per-item conflict and destination controls.
-- Extract Only: source-preserving chunked copies, SHA-256 verification, staging on destination volume and rename commit. Merge keeps unrelated files. Replace replaces the entire destination after staging. Failed staging preserves the original destination.
-- Read-only existing-registration audit with missing-content/XML/artwork/resource issues and Finder actions.
-- Searchable, filterable session logs with copy/save; remembered destination/offline preferences; quit guard.
+**Install:** drop ISO/PKG/library folders, or select files/folders. Analysis collects metadata across the entire batch before grouping library parts. Review artwork, sources, destinations, warnings and existing registrations. Import multiple XML files/directories or choose an explicit XML per candidate. Filter/sort/select the queue, choose batch/per-item destinations and resolve conflicts. Enable the helper in Settings for Full Install, or select Extract Only.
 
-## Architecture
+**Conflicts:** Ask blocks modification until you choose a policy. Merge/Update keeps unrelated files and replaces overlapping files in a verified staged tree. Replace swaps the entire library directory, retaining a backup until verification/commit. Skip performs no installation. Existing registered locations are shown and used by default, rather than silently creating a second registration elsewhere.
 
-`MaschineCore` owns models, process execution, discovery, mounts, package extraction, metadata, analysis, planning, extraction and audit. It does not import SwiftUI. `MaschineMachine` owns main-actor presentation state and views. Filesystem work uses cancellable detached workers. Analysis is serial to bound process and disk contention. Source URLs remain immutable. An analysis session owns expanded trees so queue payload URLs cannot outlive their workspace.
+**Metadata:** explicit user XML wins over embedded XML, then ProductHints. Automatic online fallback uses `https://api.native-instruments.com/static/phints`, a 15-second timeout and a shared in-memory cache. Cancellation propagates to requests. Offline Mode makes no ProductHints request. Ambiguous records block Full Install until you explicitly choose XML. Metadata is parsed structurally; external entities and DTDs are rejected. Authoritative ContentVersion is used; absent versions use a logged `1.0.0` compatibility fallback.
 
-ProductHints: `https://api.native-instruments.com/static/phints`, 15-second request timeout, in-memory batch/session cache, automatic fallback only for unresolved metadata. Offline analysis never calls the provider. Cache is not persisted. Import XML before analysis or use Bulk XML Import afterwards. Current matching is deliberately conservative: equal normalized identity only; probable/fuzzy suggestions are still a release gate.
+**Libraries:** audit registration, content, permissions, XML and artwork; inspect details and reveal files in Finder. Repair… builds a review before any mutation. Locate Content… repairs broken paths using the selected existing library; it does not imply a move. Replace XML… uses an explicit product XML. Relocate… copies and hashes the library, updates/validates registration and offers optional post-verification Trash of the old content.
 
-## Privileged architecture
+**Sources:** Keep is the default. Optional Trash runs only after selected dependents are verified. The implementation conservatively also retains a shared source if another detected dependent was unselected, failed, cancelled or skipped. Source identity/size/mtime inventories are compared before Trash; a changed source stays. Extract Only never triggers source cleanup. Trash uses FileManager's native reversible Trash API; there is no permanent-delete fallback.
 
-Registered Install fails before copying. The `PrivilegedService` protocol is a boundary, **not an implemented helper**. No sudo, root shell, generic command executor or privileged write is used.
+**Results:** candidates retain final state and diagnostics, with Retry Failed and JSON report export. Logs have severity/search/filter/copy/save/reveal controls and persistent JSONL session files. Cancellation stops at chunk boundaries, rolls back unfinished registered installations, and preserves already committed successes. Quit offers safe cancellation before exiting.
 
-Production must embed a signed launch daemon managed by `SMAppService.daemon(plistName:)`. Apple reference: https://developer.apple.com/documentation/servicemanagement/smappservice . The daemon must validate peer audit-token code signatures (fixed app ID and same signing team), bound request sizes, serialize mutations and accept only typed product registration/repair operations. Use fixed destination roots and descriptor-relative `openat`/`O_NOFOLLOW` operations to prevent symlink substitution. Do not ship a path-check-only root helper. Stage data via validated handles or bounded XPC data, not caller-supplied arbitrary root paths. Implement transaction/journal and registration read-back before enabling Install.
+## Transactions and security
 
-Signing identity and administrator approval are required to validate this end to end. An unsigned development build must continue to support analysis, audit and extraction without escalation.
+- Copy streams into a private destination-volume staging directory, hashes each source stream and reads back/hash-verifies each output. Hidden payload files are preserved. Existing libraries stay intact during staging.
+- A durable client journal precedes the directory swap. Registration has a separate root-only undo journal before any plist/XML/artwork/permission mutation.
+- The helper verifies all changed registration bytes and modes. Full success is acknowledged only after helper commit. Lost replies query durable state; uncertainty retains recovery data instead of guessing.
+- Failed registration restores registration backups and the previous content directory. Restart recovery resolves incomplete content and repair transactions and cleans stale mounts/analysis workspaces. Failed rollback retains diagnostics and backups.
+- Privileged writes use fixed NI roots, validated product names, bounded typed data and fd-relative `openat`/`renameat` with `O_NOFOLLOW`; links, devices and multiply-linked registration targets are rejected. The helper never accepts executable commands or arbitrary absolute write paths.
+- A separate tightly constrained helper capability swaps root-owned product-named library directories directly under `/Users/Shared`. It validates the caller's private staging ownership and derives staging/backup names from a UUID. It cannot operate on NI Resources or arbitrary destinations.
+- Permission repair is scoped to the selected product. Registered shared-library permission repair requires a matching existing ContentDir and PAResources, pins descriptors, rejects links/hardlinks, journals original modes and adds only missing read/traversal bits. Ordinary user-library repairs touch only paths owned by the current user. Arbitrary root-owned custom destinations remain subject to filesystem permissions; select a writable destination rather than granting a generic root filesystem capability.
+- Raw fallback extraction does not execute installer scripts. System libarchive streams regular files/directories into a pinned private tree with a disk budget and rejects archive traversal, links and special files. xar inventory errors are captured in logs. Unsupported or corrupt compression fails visibly.
 
-## Filesystem locations
+## Files and lifecycle
 
-Future registered installation writes only product-scoped paths:
+Registration changes are product-scoped:
 
-- `/Library/Preferences/com.native-instruments.<Product>.plist`: ContentDir and authoritative ContentVersion; document `1.0.0` if a fallback is necessary.
+- `/Library/Preferences/com.native-instruments.<Product>.plist` (preserves unrelated existing keys)
 - `/Library/Application Support/Native Instruments/Service Center/<Product>.xml`
-- `/Users/Shared/NI Resources/image/<Product>/`
-- User-selected library destination (initial default `/Users/Shared`).
+- `/Users/Shared/NI Resources/image/<Product>/` (preserves unrelated resource files)
 
-The current audit reads these locations. No permission repair touches all of `/Library/Preferences`.
+Root transaction journals: `/Library/Application Support/Maschine Machine/Transactions` (root-owned; not group/world writable). User preferences use UserDefaults. User logs, analysis workspaces, client journals and mount receipts live below `~/Library/Application Support/Maschine Machine/`. ISO mounts are read-only under app-owned mount roots and detached on success, failure and cancellation. Workspace/session records support cleanup after abnormal termination. User-owned destination staging is `.maschine-<UUID>` beside the final library.
 
-Analysis uses mode-0700 `MaschineMachine-<UUID>` system temporary directories. Sources and mounts are read-only inputs. ISO content is staged before detach; queue sessions retain staging. Normal session release removes staging. Extraction staging is a hidden UUID directory on the destination volume, permitting same-volume rename commit. Crash recovery journals and stale-mount recovery are not implemented yet. Do not use this development build on irreplaceable library destinations.
+Do not manually delete a directory named in a recovery error. Restore/recover through Settings after helper authorization is available. Committed helper receipts are retained so a lost acknowledgement cannot cause a later incorrect rollback.
 
-## Tests
+## Validation and remaining external acceptance
 
-Synthetic fixtures are generated under unique temporary directories. Tests cover normalization, matching/override/ambiguity, XML entity rejection, artwork, metadata-only and wrapped payload roots, multipart grouping, unsafe destinations, symlinks, source cleanup dependencies, copy verification, staging failure preservation and library-health states. Generated PKG integration verifies cross-package XML collection; cancellation during a staged copy preserves the old destination. All 15 tests passed locally. They contain no copyrighted library content.
+See [validation evidence](docs/VALIDATION.md) and [legacy compatibility](docs/COMPATIBILITY.md). Synthetic tests contain no copyrighted samples. The native and Intel wrappers validate actual XCTest case counts and fail on zero-test runs; the unused Swift Testing runner is disabled for native runs.
 
-## Universal 2 and distribution
+This host also refuses packaged GUI application registration; a separate minimal AppKit app reproduces the same system abort. GUI smoke testing must be repeated from an unrestricted desktop session. See VALIDATION.md.
 
-Run `scripts/build-app.sh` to build arm64 and x86_64 and assemble a Universal 2 `.app` in `dist`. This is a development bundle; helper/signing/notarization are not implemented by that script. Both architectures have been built and verified with lipo. Cross-compilation does not replace testing on Intel hardware. The script uses SwiftPM native build mode because this environment denies dsymutil in the newer swiftbuild backend. Xcode also builds the application; in this restricted environment add `OTHER_SWIFT_FLAGS=-disable-sandbox` for macro subprocesses.
+This host has zero valid code-signing identities. It also refuses real disk-image attachment with `Device not configured`; the real ISO integration test explicitly skips on that condition. The multipart ISO analysis and cancellation tests use structured mount fixtures plus real generated PKGs. Run the real ISO test outside this execution restriction, then run a signed helper/NI acceptance test before distributing the app. Intel builds and Rosetta tests do not substitute for testing on physical Intel hardware.
 
-Production distribution: configure an owned reverse-DNS identifier and Developer ID Application signing identity; sign helper and app with hardened runtime and secure timestamp, verify with `codesign --verify --deep --strict`, submit a ZIP using `xcrun notarytool submit --keychain-profile <profile> --wait`, then `xcrun stapler staple`. Validate with `spctl --assess --type execute`. Credentials must stay in Keychain. Never distribute an ad-hoc bundle as a production installer.
-
-## Remaining v1 release gates
-
-- Authenticated signed helper, registration transactions/read-back, NI resource installation, permission inspection/repair.
-- Repair review/execution, copy/verify relocation and registration update.
-- Crash journals, stale state recovery, robust ISO attach cancellation recovery, extraction sandbox against malicious archives/symlink creation during unpack.
-- ISO and fallback integration tests including fallback payload decompression; xar alone may produce compressed Payload files and is not sufficient for every package.
-- Existing ContentDir correlation during analysis; duplicate registration detection, richer health checks, registration validation.
-- Confidence/evidence matching UI and per-candidate explicit ambiguity resolution.
-- Post-verification Trash (currently disabled), full structured report export/retry, persistent logs.
-- More progress detail, artwork cache, batch conflict default and sort controls, disk budget across complete batch and extraction overhead.
-- Signed helper target integration, accessibility/keyboard review and UI automation.
-- Signing/notarization, real NI compatibility validation, Universal 2 runtime tests and all supplied acceptance scenarios.
-
-These are incomplete requirements, not claims that v1 is finished. Never enable destructive cleanup or registered install merely to make UI controls appear complete.
+Production notarization needs your Developer ID and Apple credentials. These are external inputs, not a disabled or unimplemented registration pipeline.

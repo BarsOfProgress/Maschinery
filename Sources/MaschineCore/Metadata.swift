@@ -20,6 +20,11 @@ public enum MetadataMatchingService {
     }
 }
 public enum MetadataXML {
+    public static func read(_ url: URL, source: MetadataSource) throws -> [RegistrationMetadata] {
+        let directory = try SecureDirectory(root: url.deletingLastPathComponent(), create: false)
+        guard let (data, _) = try directory.read(url.lastPathComponent, maximum: 32 * 1024 * 1024, createParents: false) else { throw MachineError.invalid("XML file no longer exists") }
+        return try parse(data, source: source)
+    }
     public static func parse(_ data: Data, source: MetadataSource) throws -> [RegistrationMetadata] {
         guard data.count <= 32 * 1024 * 1024 else { throw MachineError.invalid("XML exceeds 32 MB safety limit") }
         // Reject external entities/DTDs before FoundationXML parses untrusted input.
@@ -39,20 +44,30 @@ public enum MetadataXML {
 public actor ProductHintsService {
     private var cached: [RegistrationMetadata]?
     private var request: Task<[RegistrationMetadata], Error>?
-    public init() {}
-    public func clear() { cached = nil }
+    private var generation = UUID()
+    private let fetch: @Sendable () async throws -> Data
+    public init(fetch: @escaping @Sendable () async throws -> Data = ProductHintsService.fetchNative) { self.fetch = fetch }
+    public static func fetchNative() async throws -> Data {
+        var request = URLRequest(url: URL(string: "https://api.native-instruments.com/static/phints")!); request.timeoutInterval = 15
+        let (file, response) = try await URLSession.shared.download(for: request)
+        defer { try? FileManager.default.removeItem(at: file) }
+        guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw MachineError.unavailable("ProductHints returned an unsuccessful HTTP response") }
+        let directory = try SecureDirectory(root: file.deletingLastPathComponent(), create: false)
+        guard let (data, _) = try directory.read(file.lastPathComponent, maximum: 32 * 1024 * 1024, createParents: false) else { throw MachineError.unavailable("ProductHints response disappeared") }
+        return data
+    }
+    public func clear() { cached = nil; request?.cancel(); request = nil; generation = UUID() }
     public func records(offline: Bool) async throws -> [RegistrationMetadata] {
         guard !offline else { return [] }
         if let cached { return cached }
-        if let request { return try await request.value }
-        let task = Task<[RegistrationMetadata], Error> {
-            var request = URLRequest(url: URL(string: "https://api.native-instruments.com/static/phints")!); request.timeoutInterval = 15
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw MachineError.unavailable("ProductHints returned an unsuccessful HTTP response") }
-            return try MetadataXML.parse(data, source: .productHints)
-        }
+        if let request { return try await withTaskCancellationHandler { try await request.value } onCancel: { request.cancel() } }
+        let fetch = fetch, epoch = generation
+        let task = Task<[RegistrationMetadata], Error> { try MetadataXML.parse(try await fetch(), source: .productHints) }
         request = task
-        do { let result = try await task.value; cached = result; request = nil; return result }
-        catch { request = nil; throw error }
+        do {
+            let result = try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
+            if epoch == generation { cached = result; request = nil }
+            return result
+        } catch { if epoch == generation { request = nil }; throw error }
     }
 }

@@ -1,0 +1,5 @@
+module SafeArchive {
+    header "SafeArchive.h"
+    export *
+    link "archive"
+}

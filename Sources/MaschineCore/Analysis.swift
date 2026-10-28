@@ -4,8 +4,11 @@ import Foundation
 public final class AnalysisSession: Sendable {
     public let workspace: URL
     public init() throws {
-        workspace = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().appendingPathComponent("MaschineMachine-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: AnalysisRecovery.root, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        try SafeTree.validate(AnalysisRecovery.root)
+        workspace = AnalysisRecovery.root.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: false, attributes: [.posixPermissions: 0o700])
+        try Data(String(ProcessInfo.processInfo.processIdentifier).utf8).write(to: workspace.appendingPathComponent(".owner-pid"))
     }
     deinit { try? FileManager.default.removeItem(at: workspace) }
 }
@@ -13,21 +16,30 @@ public struct AnalysisResult: Sendable { public let session: AnalysisSession; pu
 public struct ExpansionAnalyzer: Sendable {
     public let log: LoggingService
     public let hints: ProductHintsService
-    public init(log: LoggingService, hints: ProductHintsService = ProductHintsService()) { self.log = log; self.hints = hints }
+    public let runner: any ProcessRunning
+    public init(log: LoggingService, hints: ProductHintsService = ProductHintsService(), runner: any ProcessRunning = ProcessRunner()) { self.log = log; self.hints = hints; self.runner = runner }
     public func analyze(_ urls: [URL], destination: URL, explicit: [RegistrationMetadata] = [], offline: Bool = false) async throws -> AnalysisResult {
         let session = try AnalysisSession()
-        let sources = try SourceDiscoveryService.discover(urls)
         var trees: [(URL, SourceArtifact, String?)] = []
-        let packages = PackageExtractionService(log: log)
+        var failures: [ExpansionCandidate] = []
+        func failed(_ source: SourceArtifact, _ error: Error) -> ExpansionCandidate {
+            ExpansionCandidate(name: ProductName.display(source.url.deletingPathExtension().lastPathComponent), sources: [source], payloads: [], destination: destination.appendingPathComponent(source.url.deletingPathExtension().lastPathComponent), warnings: [error.localizedDescription], state: .failed)
+        }
+        let sources = try SourceDiscoveryService.discover(urls, onError: { url, error in
+            let type: SourceType = url.pathExtension.lowercased() == "pkg" ? .pkg : url.pathExtension.lowercased() == "iso" ? .iso : .folder
+            failures.append(failed(SourceArtifact(url: url, type: type), error))
+        })
+        for candidate in failures { await log.log(.error, candidate.name + ": " + candidate.warnings.joined(separator: "; ")) }
+        let packages = PackageExtractionService(runner: runner, log: log)
         for source in sources {
             try Task.checkCancellation()
             await log.log(.info, "Analysing \(source.url.lastPathComponent)")
             do {
                 switch source.type {
-                case .folder: trees.append((source.url, source, nil))
+                case .folder: try SafeTree.walk(source.url) { _ in true }; trees.append((source.url, source, nil))
                 case .pkg: trees.append((try await packages.expand(source.url, workspace: session.workspace), source, source.url.lastPathComponent))
                 case .iso:
-                    let iso = ISOService(); let mounts = try await iso.attach(source.url)
+                    let iso = ISOService(runner: runner); let mounts = try await iso.attach(source.url)
                     var failure: Error?
                     do {
                         for mount in mounts {
@@ -38,7 +50,7 @@ public struct ExpansionAnalyzer: Sendable {
                                 else if component.type == .folder {
                                     let copy = session.workspace.appendingPathComponent(UUID().uuidString).appendingPathComponent(component.url.lastPathComponent)
                                     try FileManager.default.createDirectory(at: copy.deletingLastPathComponent(), withIntermediateDirectories: false)
-                                    try SafeTree.walk(component.url) { _ in true }; try FileManager.default.copyItem(at: component.url, to: copy)
+                                    try await InstallationService(log: log).copyTree(component.url, to: copy) { _ in }
                                     trees.append((copy, source, nil))
                                 }
                             }
@@ -59,14 +71,14 @@ public struct ExpansionAnalyzer: Sendable {
                     if let failure { throw failure }
                 }
             } catch is CancellationError { throw CancellationError() }
-            catch { await log.log(.error, "\(source.url.lastPathComponent): \(error.localizedDescription)") }
+            catch { failures.append(failed(source, error)); await log.log(.error, "\(source.url.lastPathComponent): \(error.localizedDescription)") }
         }
         var records = explicit
         var xmlDiagnostics: [String] = []
         for (tree, _, _) in trees {
             try SafeTree.walk(tree) { url in
                 if url.pathExtension.lowercased() == "xml" {
-                    do { records += try MetadataXML.parse(Data(contentsOf: url), source: .embedded) }
+                    do { records += try MetadataXML.read(url, source: .embedded) }
                     catch { xmlDiagnostics.append("XML could not be read (\(url.lastPathComponent)): \(error.localizedDescription)") }
                 }; return true
             }
@@ -90,8 +102,9 @@ public struct ExpansionAnalyzer: Sendable {
             do { records += try await hints.records(offline: false); await log.log(.info, "ProductHints metadata loaded") }
             catch { await log.log(.warning, "ProductHints unavailable: \(error.localizedDescription)") }
         }
-        var candidates = Array(grouped.values)
+        var candidates = Array(grouped.values) + failures
         for index in candidates.indices {
+            if candidates[index].state == .failed { continue }
             switch MetadataMatchingService.match(candidates[index].name, in: records) {
             case .matched(let metadata): candidates[index].metadata = metadata; candidates[index].name = metadata.name
             case .ambiguous: candidates[index].warnings.append("Ambiguous registration metadata. Choose XML before installing.")

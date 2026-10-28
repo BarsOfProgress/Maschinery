@@ -1,34 +1,39 @@
-# Legacy behavior inventory
+# Legacy compatibility inventory
 
-Entire reference script reviewed (587 lines). The following maps every compatibility branch to its replacement and validation target. “Pending” means a release gate, not an intentionally removed feature.
+The entire 587-line legacy script was reviewed before the foundation. Its installer-layout knowledge is preserved independently of its GUI and unsafe mutation behavior.
 
-| Legacy behavior | Replacement | Validation |
-|---|---|---|
-| Mixed folder/ISO/PKG batch, hidden entries skipped | SourceDiscovery, package boundary pruning | Synthetic discovery |
-| ISO read-only/no Finder; readable volume | hdiutil attach -plist -readonly -nobrowse | Real ISO integration pending |
-| Multiple PKGs on ISO | Collect every extracted tree before resolution | Synthetic multipart; ISO integration pending |
-| XML in separate installer PKG | Shared metadata pool for complete batch | Matching tests |
-| Loose top-level ISO Library | Same root detector on mounted volume | Synthetic loose layout |
-| Service Center / Service Centre | XML tree discovery independent of spelling | XML tests |
-| pkgutil --expand-full | ProcessRunner abstraction | Generated PKG integration pending |
-| Bundle PKG fallback | Copy bundle to workspace | Bundle integration pending |
-| xar nonzero but useful output | Log fallback, inspect resulting output | Failure injection pending |
-| Name contains Library incl concatenation/parts | RootDetector + normalized grouping | Root and normalization tests |
-| PAResources without Library name | RootDetector | Root tests |
-| Library PKG with different payload name | Payload wrapper fallback | Wrapped fixtures |
-| Multiple subfolders under Payload | Return all content roots | Wrapped fixtures |
-| Scripts/Resources/Contents/PackageInfo/__MACOSX | Ignore metadata in fallback | Metadata-only fixtures |
-| Installer/setup with no payload | Log metadata component, no fake candidate | Metadata-only fixtures |
-| Shared XML variants spaces/underscores | Structured XML + normalized matching | Matching tests |
-| Multiple parts merge | Group normalized identity, retain all payloads | Multipart test |
-| PAResources/image/product/MST_artwork.png | Recursive artwork discovery | Artwork fixture |
-| Embedded XML | Batch metadata collection | XML fixture |
-| ProductHints fallback | Actor provider, timeout, cache, offline gate | Live endpoint validation pending |
-| Explicit XML/offline | Highest-priority metadata and no network | Override tests |
-| Manual payload extraction | Same analysis, Extract Only plan | Copy/rollback tests |
-| Plist ContentDir/ContentVersion | Typed registration contract | Signed helper pending |
-| NI resource image copy | Product-scoped registration operation | Signed helper pending |
-| Service Center XML | Fixed helper destination | Signed helper pending |
-| Post-copy nonempty check | Byte manifest verification | Transaction tests |
+| Case | Implementation / evidence |
+|---|---|
+| Mixed ISO/PKG/folder sources, hidden discovery entries ignored | SourceDiscoveryService; payload copy itself preserves hidden files |
+| Read-only ISO, no Finder windows, actual mount path | Plist hdiutil output, private mountroot, durable mount receipts |
+| Multiple PKGs in one ISO | Multipart ISO fixture with three generated real PKGs |
+| XML in another metadata-only PKG | Shared metadata collection before resolution; generated PKG and ISO tests |
+| Loose library folders on ISO | Same root detector; loose library in multipart ISO test |
+| Service Center / Service Centre | Structural XML collection regardless of spelling; fixtures include Centre |
+| pkgutil --expand-full primary | Real generated package tests |
+| Bundle packages | Directory fallback; Contents/Archive.pax.gz fixture |
+| pkgutil failure / xar fallback | Logged xar inventory plus confined system-libarchive XAR/Payload extraction; injected failure test |
+| Useful partial extraction despite xar nonzero | Inventory exit is logged, not treated as proof of unusability; safe extraction validates its own output. Corrupt/incomplete content is rejected visibly. Raw unsafe xar filesystem extraction was deliberately replaced. |
+| Name contains Library, including concatenated/multipart names | Root and normalization tests |
+| PAResources root without Library in name | Root tests and bundle fixture |
+| Library PKG filename with differently named payload | Payload-wrapper fallback fixtures |
+| Payload wrappers and multiple directories | Recursive wrapper fixtures |
+| Scripts/Resources/Contents/PackageInfo/__MACOSX exclusions | Root detector and metadata-only fixtures |
+| Installer/setup metadata-only package | Contributes XML without a fake expansion candidate |
+| Space/underscore/hyphen/concatenated identity | Conservative normalized matching; ambiguous records require explicit selection |
+| Multipart payloads merge into logical expansion | 40-expansion offline batch and multipart ISO fixture |
+| PAResources/image/product/MST_artwork.png | Artwork discovery, async UI thumbnails, RegistrationBuilder product-scoped resource installation |
+| Embedded XML | Structured parser; full registered-install tests |
+| ProductHints fallback | Automatic provider, 15-second timeout, shared cache, cancellation, visible failures |
+| Offline/user XML | User priority; batch and individual import; 40-expansion fully offline install test |
+| Manual payload extraction | Shared planner/copy/verification pipeline without NI registration |
+| NI plist ContentDir/ContentVersion | Real plist serialization/read-back; retains unrelated keys; logged 1.0.0 fallback only without an authoritative version |
+| NI Resources artwork | Product-scoped fixed-root writes, verification and undo |
+| Service Center XML | Fixed-root writes, structural validation and byte read-back |
+| Permission repair | Selected NI registration/resource files; inode-checked selected library modes; no recursive repair of /Library/Preferences |
+| Copy success verification | Chunked SHA-256 copy/read-back plus registration verification |
+| Source preservation/cleanup | Copy only; source identity recheck and all-dependent success gate before native Trash |
 
-Deliberately removed: mv from sources, fixed /tmp paths, title-casing authoritative names, silent network exceptions, rm -rf conflicts, broad recursive chmod/chown, sudo heartbeat and terminal password prompts. Source cleanup must require verified success for ALL dependents (including unselected dependents).
+Signing/authorization is an external validation requirement, not an unimplemented helper. The root engine, XPC client/server, embedded daemon, signing configuration and Full Install UI path are present. See VALIDATION.md for which tests require a signed app or a host with a working disk-image service.
+
+Deliberately removed: source mv, fixed /tmp paths, guessed title-casing of product names, swallowed network exceptions, raw rm -rf conflicts, broad chmod/chown, sudo heartbeat and Terminal password prompts.
