@@ -27,6 +27,7 @@ public struct ExpansionCandidate: Identifiable, Sendable {
     public var destination: URL
     public var size: Int64
     public var artwork: URL?
+    public var artworkDiscovery: ArtworkDiscovery?
     public var metadata: RegistrationMetadata?
     public var warnings: [String]
     public var state: CandidateState

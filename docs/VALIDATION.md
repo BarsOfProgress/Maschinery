@@ -31,8 +31,8 @@ The Intel script explicitly launches x86_64 XCTest under Rosetta. Plain `swift t
 
 | Check | Result |
 |---|---|
-| Apple Silicon XCTest | 43 discovered; 42 passed; 1 real-image test skipped; 0 failures |
-| Intel XCTest under Rosetta | 43 discovered; 42 passed; 1 real-image test skipped; 0 failures |
+| Apple Silicon XCTest | 56 discovered; 55 passed; 1 real-image test skipped; 0 failures |
+| Intel XCTest under Rosetta | 56 discovered; 55 passed; 1 real-image test skipped; 0 failures |
 | Native Xcode Release app/core/helper build | Succeeded for arm64 and x86_64 |
 | Universal bundle script | Succeeded; both app and embedded helper contain x86_64 and arm64 |
 | Ad-hoc bundle signature verification | `codesign --verify --deep --strict` passed |
@@ -51,3 +51,7 @@ The former trailing “Test run with 0 tests in 0 suites passed” came from Swi
 The final bundle passes executable lookup through Foundation Bundle, executable-mode checks, architecture checks, plist lint and deep signature verification. This execution host nevertheless refuses Launch Services registration (`lsregister -f`: -10822; `open`: -10827). Direct launch aborts in Apple's `HIServices._RegisterApplication` during NSApplication initialization, before the product's UI starts. The native Xcode app behaves the same way. An independently compiled, packaged minimal AppKit program containing only NSApplication initialization reproduces the same abort. Interpreted, unbundled AppKit initialization works but logs a Launch Services notification failure when a window is created.
 
 Consequently GUI launch and end-to-end signed-helper acceptance are **not validated on this host**. Confirm them by opening the built/signed app from an unrestricted desktop session. No private-API or process-registration bypass was added to the application to hide this limitation.
+
+## Artwork regression pass
+
+Thirteen new synthetic-image tests exercise PNG/JPEG/TIFF metadata, MST and non-MST artwork, competing assets, product-directory evidence, dimensions/aspect, tiny/corrupt rejections, missing-art placeholders, multipart input order, installed JPEG previews and cache reuse/invalidation/off-main decoding. The complete suite now discovers 56 cases (55 passed, the same real-ISO case skipped). Existing registered-install/repair/relocation tests remain in the full suite. See ARTWORK.md for diagnostic details and weights.

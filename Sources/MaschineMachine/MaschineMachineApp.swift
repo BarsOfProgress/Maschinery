@@ -154,6 +154,21 @@ struct CandidateRow: View {
                 Divider()
                 ForEach(candidate.sources) { source in Button(source.url.path) { NSWorkspace.shared.activateFileViewerSelecting([source.url]) }.buttonStyle(.link).font(.caption) }
                 ForEach(Array(candidate.warnings.enumerated()), id: \.offset) { _, warning in Label(warning, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.secondary) }
+                if let discovery = candidate.artworkDiscovery {
+                    DisclosureGroup("Artwork diagnostics · \(discovery.consideredCount) images considered") {
+                        VStack(alignment: .leading, spacing: 7) {
+                            Text(discovery.selected?.url.path ?? "No artwork selected — dark placeholder").font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                            Text(discovery.selectionReason).font(.caption).foregroundStyle(.secondary)
+                            ForEach(discovery.rankedCandidates) { image in
+                                Text("\(image.url.lastPathComponent) · \(image.dimensions) · score \(image.score)\n" + image.reasons.joined(separator: "; ")).font(.caption).textSelection(.enabled)
+                            }
+                            ForEach(discovery.rejectedCandidates) { image in
+                                Text("Rejected \(image.url.lastPathComponent) · \(image.dimensions): \(image.rejectionReason ?? "")").font(.caption).foregroundStyle(.secondary)
+                            }
+                            ForEach(discovery.warnings, id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
+                        }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
+                    }
+                }
                 if candidate.policy == .replace { Text("Replace swaps the entire destination. The old directory is backed up until verification, then removed.").font(.caption).foregroundStyle(.orange) }
                 HStack {
                     Picker("Existing content", selection: Binding(get: { candidate.policy }, set: { policy in if let i = model.candidates.firstIndex(where: { $0.id == candidate.id }) { model.candidates[i].policy = policy } })) { ForEach(ConflictPolicy.allCases, id: \.self) { Text($0.rawValue.capitalized) } }.frame(width: 230)
@@ -177,11 +192,10 @@ struct ArtworkView: View {
             else { VStack(spacing: 6) { Image(systemName: "square.grid.4x3.fill").foregroundStyle(Color(white: 0.35)); Text(name.uppercased()).font(.system(size: 8, weight: .bold)).lineLimit(2).multilineTextAlignment(.center) }.padding(8) }
         }.clipped().accessibilityLabel("\(name) artwork")
         .task(id: url) {
+            thumbnail = nil
             guard let url else { return }
-            thumbnail = await Task.detached {
-                guard let source = CGImageSourceCreateWithURL(url as CFURL, nil), let image = CGImageSourceCreateThumbnailAtIndex(source, 0, [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceThumbnailMaxPixelSize: 512, kCGImageSourceCreateThumbnailWithTransform: true] as CFDictionary) else { return nil as NSImage? }
-                return NSImage(cgImage: image, size: .zero)
-            }.value
+            guard let cached = await ArtworkThumbnailCache.shared.thumbnail(at: url), !Task.isCancelled else { return }
+            thumbnail = NSImage(cgImage: cached.image, size: NSSize(width: cached.image.width, height: cached.image.height))
         }
     }
 }

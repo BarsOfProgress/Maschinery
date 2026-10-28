@@ -75,14 +75,3 @@ public enum LibraryRootDetector {
         }; return found
     }
 }
-public enum ArtworkService {
-    public static func find(in root: URL) throws -> URL? {
-        var images: [URL] = []
-        let resources = root.appendingPathComponent("PAResources/image")
-        guard SafeTree.isDirectory(resources) else { return nil }
-        try SafeTree.walk(resources) { url in
-            if ["png", "jpg", "jpeg"].contains(url.pathExtension.lowercased()) { images.append(url) }; return true
-        }
-        return images.first { $0.lastPathComponent.lowercased() == "mst_artwork.png" } ?? images.first
-    }
-}

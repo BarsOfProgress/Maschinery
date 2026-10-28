@@ -38,6 +38,10 @@ Open `MaschineMachine.xcodeproj` for native app, core and helper targets. `Packa
 
 **Results:** candidates retain final state and diagnostics, with Retry Failed and JSON report export. Logs have severity/search/filter/copy/save/reveal controls and persistent JSONL session files. Cancellation stops at chunk boundaries, rolls back unfinished registered installations, and preserves already committed successes. Quit offers safe cancellation before exiting.
 
+## Artwork previews
+
+Artwork is ranked across all resolved payload parts using product folders, filenames, actual image dimensions, aspect ratio and UI-asset penalties. MST_artwork is preferred but never required. Expand a queue row’s Artwork diagnostics to see the selected path, score and reasons, alternatives and rejections. Thumbnails use a bounded shared cache and decode off the main actor. See [artwork rules and diagnostics](docs/ARTWORK.md).
+
 ## Transactions and security
 
 - Copy streams into a private destination-volume staging directory, hashes each source stream and reads back/hash-verifies each output. Hidden payload files are preserved. Existing libraries stay intact during staging.

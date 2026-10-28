@@ -75,6 +75,12 @@ import MaschineCore
                         for payload in candidate.payloads where !candidates[i].payloads.contains(payload) { candidates[i].payloads.append(payload) }
                         candidates[i].sources += candidate.sources; candidates[i].size += candidate.size
                         if candidates[i].metadata == nil { candidates[i].metadata = candidate.metadata }
+                        // A later drop may supply the artwork-bearing part of an existing logical expansion.
+                        let payloads = candidates[i].payloads, product = candidates[i].name
+                        let discovery = try await background { try ArtworkService.discover(payloads: payloads, productName: product) }
+                        candidates[i].artworkDiscovery = discovery; candidates[i].artwork = discovery.selected?.url
+                        if discovery.selected != nil { candidates[i].warnings.removeAll { $0 == "Artwork unavailable" } }
+                        await ArtworkService.log(discovery, product: product, to: log)
                         selected.insert(candidates[i].id)
                     } else { candidates.append(candidate); selected.insert(candidate.id) }
                 }

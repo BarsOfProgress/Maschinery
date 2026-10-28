@@ -30,7 +30,7 @@ final class CoreTests: XCTestCase {
     func testRootsAndWrappers() throws {
         let root = try fixture()
         let a = try directory("Test Library/PAResources/image/Test", in: root)
-        try Data([0]).write(to: a.appendingPathComponent("MST_artwork.png"))
+        try SyntheticArtworkFixture.image(at: a.appendingPathComponent("MST_artwork.png"))
         _ = try directory("OtherLibrary/Samples", in: root)
         _ = try directory("NoSuffix/PAResources", in: root)
         _ = try directory("Scripts/False Library", in: root)

@@ -44,9 +44,23 @@ public enum ExistingLibraryService {
                     if !records.isEmpty && !records.contains(where: { ProductName.key($0.name) == ProductName.key(name) }) { issues.append(.registration) }
                 } catch { issues.append(.registration) }
             }
-            let artwork = try? ArtworkService.find(in: content ?? URL(fileURLWithPath: "/nonexistent"))
-            let installedArtwork = resources.appendingPathComponent(name).appendingPathComponent("MST_artwork.png")
-            if !FileManager.default.isReadableFile(atPath: installedArtwork.path) { issues.append(.missingArtwork) }
+            let localArtwork = try? ArtworkService.find(in: content ?? URL(fileURLWithPath: "/nonexistent"), productName: name)
+            let productImages = resources.appendingPathComponent(name)
+            let resourceArtwork = localArtwork == nil ? try? ArtworkService.discoverImageRoots([productImages], productName: name).selected?.url : nil
+            let artwork = localArtwork ?? resourceArtwork
+            // This existing health check reports installed resource presence, not image decoding validity.
+            // Display selection separately validates metadata and ranks plausible images.
+            var hasInstalledImage = false
+            if SafeTree.isDirectory(productImages) {
+                do {
+                    try SafeTree.walk(productImages) { url in
+                        if !SafeTree.isDirectory(url), ArtworkService.extensions.contains(url.pathExtension.lowercased()), FileManager.default.isReadableFile(atPath: url.path) { hasInstalledImage = true }
+                        return true
+                    }
+                } catch is CancellationError { throw CancellationError() }
+                catch { if !issues.contains(.unreadable) { issues.append(.unreadable) } }
+            }
+            if !hasInstalledImage { issues.append(.missingArtwork) }
             return InstalledLibrary(id: plist, name: name, content: content, version: version, artwork: artwork, issues: issues, serviceCenter: serviceCenter)
         }.sorted { $0.name < $1.name }
         let identities = Dictionary(grouping: libraries, by: { ProductName.key($0.name) })

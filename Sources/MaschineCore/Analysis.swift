@@ -93,7 +93,7 @@ public struct ExpansionAnalyzer: Sendable {
                     if !candidate.payloads.contains(root) { candidate.payloads.append(root); candidate.size += try SafeTree.byteCount(root) }
                     if !candidate.sources.contains(source) { candidate.sources.append(source) }; grouped[key] = candidate
                 } else {
-                    grouped[key] = ExpansionCandidate(name: name, sources: [source], payloads: [root], destination: destination.appendingPathComponent(name), size: try SafeTree.byteCount(root), artwork: try ArtworkService.find(in: root))
+                    grouped[key] = ExpansionCandidate(name: name, sources: [source], payloads: [root], destination: destination.appendingPathComponent(name), size: try SafeTree.byteCount(root))
                 }
             }
         }
@@ -110,6 +110,10 @@ public struct ExpansionAnalyzer: Sendable {
             case .ambiguous: candidates[index].warnings.append("Ambiguous registration metadata. Choose XML before installing.")
             case .unresolved: candidates[index].warnings.append("Registration metadata unavailable. Import XML or use Extract Only.")
             }
+            let artwork = try ArtworkService.discover(payloads: candidates[index].payloads, productName: candidates[index].name)
+            candidates[index].artworkDiscovery = artwork
+            candidates[index].artwork = artwork.selected?.url
+            await ArtworkService.log(artwork, product: candidates[index].name, to: log)
             if candidates[index].artwork == nil { candidates[index].warnings.append("Artwork unavailable") }
             if FileManager.default.fileExists(atPath: candidates[index].destination.path) { candidates[index].state = .conflict }
             else if !candidates[index].warnings.isEmpty { candidates[index].state = .warning }
