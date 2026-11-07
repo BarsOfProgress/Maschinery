@@ -8,10 +8,10 @@ ACCENT_COLOR = "#00e5ff"
 BTN_COLOR = "#333333"
 ALERT_COLOR = "#ff4b2b"
 current_user = os.environ.get("SUDO_USER") or os.getlogin()
-class MaschineMachineApp:
+class MaschineryApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Maschine Machine v1.1.15")
+        self.root.title("Maschinery (legacy reference)")
         self.root.configure(bg=BG_COLOR)
         self.sudo_active = False
         self.style = ttk.Style()
@@ -31,7 +31,7 @@ class MaschineMachineApp:
     def create_main_menu(self):
         for widget in self.root.winfo_children():
             widget.destroy()
-        tk.Label(self.root, text="MASCHINE MACHINE", font=("Helvetica", 24, "bold"), bg=BG_COLOR, fg=ACCENT_COLOR).pack(pady=(30, 5))
+        tk.Label(self.root, text="MASCHINERY", font=("Helvetica", 24, "bold"), bg=BG_COLOR, fg=ACCENT_COLOR).pack(pady=(30, 5))
         tk.Label(self.root, text="Maschine Toolbox • Special Thanks to jointsmith", font=("Helvetica", 9), bg=BG_COLOR, fg="#555555").pack(pady=(0, 20))
         container = tk.Frame(self.root, bg=BG_COLOR)
         container.pack(fill="both", padx=50, pady=(0, 20))
@@ -585,4 +585,4 @@ class MaschineMachineApp:
                 if os.path.exists(p): self.set_permissions(p)
             messagebox.showinfo("Done", "Permissions repaired.")
 if __name__ == "__main__":
-    root = tk.Tk(); app = MaschineMachineApp(root); root.mainloop()
+    root = tk.Tk(); app = MaschineryApp(root); root.mainloop()

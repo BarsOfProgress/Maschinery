@@ -36,7 +36,7 @@ The GUI must never be run as root. No Terminal sudo step is part of installation
 Once a valid identity is in your Keychain:
 
 ```sh
-cd /Users/mef/MaschineMachine
+cd /path/to/Maschinery
 SIGNING_IDENTITY='0BDE0EBF64FBA341DB98AB72EB98CD5AF40C20DB' \
 SIGNING_KEYCHAIN='/Users/mef/Library/Keychains/login.keychain-db' scripts/build-app.sh
 codesign --verify --deep --strict 'dist/Maschinery.app'
