@@ -22,7 +22,7 @@ import MaschineryCore
                 Button("Bulk XML Import…") { model.choose(xml: true) }
             }
             CommandGroup(replacing: .appInfo) { Button("About Maschinery") {
-                NSApplication.shared.orderFrontStandardAboutPanel(options: [.applicationName: "Maschinery", .applicationVersion: "1.0.2", .credits: NSAttributedString(string: "Independent utility. Not affiliated with or endorsed by Native Instruments.\nFull Install uses an approved, signed privileged helper.")])
+                NSApplication.shared.orderFrontStandardAboutPanel(options: [.applicationName: "Maschinery", .applicationVersion: "1.0.3", .credits: NSAttributedString(string: "Independent utility. Not affiliated with or endorsed by Native Instruments.\nFull Install uses an approved, signed privileged helper.")])
             } }
             CommandGroup(after: .windowArrangement) { Button("Logs") { model.page = "Logs" }.keyboardShortcut("l") }
         }
@@ -62,7 +62,7 @@ struct MainView: View {
                     }.buttonStyle(.plain).padding(.bottom, 4)
                 }
                 Spacer()
-                Text("MASCHINERY\n1.0.2").font(.system(size: 10)).foregroundStyle(.secondary).lineSpacing(5).padding(.bottom, 22)
+                Text("MASCHINERY\n1.0.3").font(.system(size: 10)).foregroundStyle(.secondary).lineSpacing(5).padding(.bottom, 22)
             }.padding(.horizontal, 20).frame(width: 190).background(panel)
             Rectangle().fill(Color(white: 0.18)).frame(width: 1)
             VStack(spacing: 0) {

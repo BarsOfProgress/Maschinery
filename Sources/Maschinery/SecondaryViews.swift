@@ -199,7 +199,7 @@ struct SettingsView: View {
                 Text("macOS requests administrator approval in System Settings. The app never runs as root.").font(.caption).foregroundStyle(.secondary)
             }
             Section("About") {
-                Text("Maschinery · 1.0.2")
+                Text("Maschinery · 1.0.3")
                 Text("An independent utility, not affiliated with or endorsed by Native Instruments.").font(.caption).foregroundStyle(.secondary)
                 Text("Registered installation and maintenance require an Apple-signed app and approved helper. Sources stay intact until verification.").font(.caption).foregroundStyle(.secondary)
             }
