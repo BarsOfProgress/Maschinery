@@ -1,6 +1,11 @@
 # Validation evidence — 2026-10-28
 
 
+## Installation privileges interface — 2026-11-07
+
+Settings now shows only the elevated installation privileges status. Component controls, the launch enable prompt and helper terminology in the main UI were removed. Public release scripts attach only the full installer and checksum; the maintenance package remains a developer/support artifact. The Universal ad-hoc build and rebuilt package signature/hash/ownership checks passed. This presentation/distribution change does not change the privileged operation engine; no new system installation acceptance is claimed.
+
+
 ## Certificate-free installer implementation — 2026-11-07
 
 The new 1.0.4 implementation builds a Universal 2 app, daemon and native setup executable with ad-hoc signatures and hardened runtime. The full installer installs root-owned launchd configuration and pins app/helper/setup CodeDirectory hashes for both architectures; the helper-removal package retains the app, NI content, registrations and transaction journals. The legacy Apple-team SMAppService option remains available.

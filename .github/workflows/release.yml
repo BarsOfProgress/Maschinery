@@ -1,4 +1,4 @@
-name: Maschinery — macOS DMG release
+name: Maschinery — macOS installer release
 on:
   push:
     tags: ['v*']
@@ -46,23 +46,21 @@ jobs:
         run: swift scripts/check-adhoc-helper.swift dist/Maschinery.app
       - name: Verify ad-hoc XPC peer authentication
         run: scripts/test-helper-trust.sh
-      - name: Package certificate-free full installer and helper uninstaller
+      - name: Package certificate-free full installer
         run: scripts/package-installer.sh
       - name: Inspect installer contents and pinned identities
         run: scripts/verify-installer.sh
-      - name: Package and verify DMG
-        run: scripts/package-dmg.sh
-      - name: Attach DMG and checksum to draft release
+      - name: Attach full installer and checksum to draft release
         shell: bash
         run: |
           set -euo pipefail
-          dmg="dist/Maschinery-$RELEASE_TAG-macOS.dmg"
+          installer="dist/Maschinery-$RELEASE_TAG-Full-Install.pkg"
           # Only add this macOS artifact; never delete assets from other platforms.
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
-            gh release upload "$RELEASE_TAG" "$dmg" "$dmg.sha256" "dist/Maschinery-$RELEASE_TAG-Full-Install.pkg" "dist/Maschinery-$RELEASE_TAG-Full-Install.pkg.sha256" "dist/Maschinery-$RELEASE_TAG-Remove-Helper.pkg" "dist/Maschinery-$RELEASE_TAG-Remove-Helper.pkg.sha256"
+            gh release upload "$RELEASE_TAG" "$installer" "$installer.sha256"
           else
-            gh release create "$RELEASE_TAG" "$dmg" "$dmg.sha256" "dist/Maschinery-$RELEASE_TAG-Full-Install.pkg" "dist/Maschinery-$RELEASE_TAG-Full-Install.pkg.sha256" "dist/Maschinery-$RELEASE_TAG-Remove-Helper.pkg" "dist/Maschinery-$RELEASE_TAG-Remove-Helper.pkg.sha256" --verify-tag --draft \
+            gh release create "$RELEASE_TAG" "$installer" "$installer.sha256" --verify-tag --draft \
               --title "Maschinery ${RELEASE_TAG#v}" \
-              --notes 'Universal macOS DMG (Apple Silicon and Intel), macOS 14+. Open the disk image and drag Maschinery to Applications. Ad-hoc signed; no Developer ID or notarization. Gatekeeper may require approval in Privacy & Security. Install the Full Install .pkg for privileged features with administrator approval. The Remove Helper .pkg retains libraries and registrations. Review this draft before publishing.'
+              --notes 'Universal macOS installer (Apple Silicon and Intel), macOS 14+. Run the installer and approve administrator access, then open Maschinery from Applications. Ad-hoc signed; no Developer ID or notarization. Gatekeeper may require approval in Privacy & Security. Review this draft before publishing.'
           fi

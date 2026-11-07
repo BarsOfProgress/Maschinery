@@ -186,23 +186,17 @@ struct SettingsView: View {
                 }
                 Text("The catalogue is checked once at launch when older than this age. Further updates use Refresh. Missing means not detected locally; ownership is not checked.").font(.caption).foregroundStyle(.secondary)
             }
-            Section("Privileged helper") {
-                Toggle("Ask to enable the helper at launch", isOn: $model.askToEnableHelperAtLaunch)
+            Section("Installation privileges") {
                 HStack(spacing: 8) {
                     Circle().fill(model.helperEnabled ? Color.green : Color.red).frame(width: 8, height: 8)
                         .accessibilityHidden(true)
-                    Text(model.helperEnabled ? "Privileged helper enabled" : "Privileged helper not enabled")
+                    Text(model.helperEnabled ? "Elevated privileges for installation enabled" : "Elevated privileges for installation not enabled")
                 }
-                Button("Enable Helper…") { model.enableHelper() }
-                Button("Refresh Helper Status") { model.checkHelper() }
-                Button("Remove Helper…") { model.removeHelper() }.disabled(model.busy)
-                Button("Recover Interrupted Operations") { model.recover() }.disabled(model.busy)
-                Text("macOS requests administrator approval in System Settings. The app never runs as root.").font(.caption).foregroundStyle(.secondary)
             }
             Section("About") {
                 Text("Maschinery · 1.0.4")
                 Text("An independent utility, not affiliated with or endorsed by Native Instruments.").font(.caption).foregroundStyle(.secondary)
-                Text("Registered installation and maintenance require the helper installed by the Full Install .pkg, or an approved Apple-signed helper. Sources stay intact until verification.").font(.caption).foregroundStyle(.secondary)
+                Text("Install Maschinery using the full installer to enable installation and maintenance. Sources stay intact until verification.").font(.caption).foregroundStyle(.secondary)
             }
         }.formStyle(.grouped).disabled(model.busy)
             .onAppear { model.checkHelper() }

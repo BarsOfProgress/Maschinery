@@ -22,7 +22,7 @@ import MaschineryCore
                 Button("Bulk XML Import…") { model.choose(xml: true) }
             }
             CommandGroup(replacing: .appInfo) { Button("About Maschinery") {
-                NSApplication.shared.orderFrontStandardAboutPanel(options: [.applicationName: "Maschinery", .applicationVersion: "1.0.4", .credits: NSAttributedString(string: "Independent utility. Not affiliated with or endorsed by Native Instruments.\nFull Install uses an administrator-approved privileged helper.")])
+                NSApplication.shared.orderFrontStandardAboutPanel(options: [.applicationName: "Maschinery", .applicationVersion: "1.0.4", .credits: NSAttributedString(string: "Independent utility. Not affiliated with or endorsed by Native Instruments.\nInstallation and maintenance use administrator-approved privileges.")])
             } }
             CommandGroup(after: .windowArrangement) { Button("Logs") { model.page = "Logs" }.keyboardShortcut("l") }
         }
@@ -125,7 +125,7 @@ struct InstallView: View {
                     Text("Install your Maschine expansions without Native Access. Add your expansion files, choose where they go, and let Maschinery install, register and verify your libraries.").foregroundStyle(.secondary).font(.system(size: 13))
                         .lineLimit(nil).fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Label("Full Install requires the helper. Install the Full Install .pkg or see Settings.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary)
+                    Label("Elevated privileges for installation are not enabled. Run the full installer, then reopen Maschinery.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary)
                 }.padding(24).frame(maxWidth: .infinity, alignment: .leading).background(panel)
                 Spacer()
             } else {

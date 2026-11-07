@@ -14,13 +14,11 @@ Native SwiftUI companion for bulk Maschine library installation, extraction, aud
 
 ## Install the macOS release
 
-For full functionality, download and open **Maschinery-vVERSION-Full-Install.pkg** from [GitHub Releases](https://github.com/BarsOfProgress/Maschinery/releases). Quit Maschinery first, including in other login sessions. The installer asks for administrator approval, installs the app in Applications and installs its root-owned helper. Open Maschinery normally afterwards. Your Mac needs no developer certificate or developer account.
+For full functionality, download and open **Maschinery-vVERSION-Full-Install.pkg** from [GitHub Releases](https://github.com/BarsOfProgress/Maschinery/releases). Quit Maschinery first, including in other login sessions. The installer asks for administrator approval, installs the app in Applications and sets up elevated installation privileges automatically. Open Maschinery normally afterwards. Your Mac needs no developer certificate or developer account.
 
-The app and helper use ad-hoc signatures with hardened runtime. The package is unsigned and not notarized, so macOS may require an explicit exception in **System Settings → Privacy & Security → Open Anyway** after the first opening attempt. See [Apple's instructions](https://support.apple.com/en-us/102445). A checksum helps verify the downloaded artifact, but does not identify its publisher; obtain the package from a source you trust.
+The installed components use ad-hoc signatures with hardened runtime. The package is unsigned and not notarized, so macOS may require an explicit exception in **System Settings → Privacy & Security → Open Anyway** after the first opening attempt. See [Apple's instructions](https://support.apple.com/en-us/102445). A checksum helps verify the downloaded artifact, but does not identify its publisher; obtain the package from a source you trust.
 
-The drag-to-Applications DMG remains available for browsing, analysis and extraction. Dragging the app alone does not install the privileged helper. Full Install, registered removal, permission repair and privileged relocation require the matching Full Install package.
-
-Updates also use the installer and administrator approval. App/helper identities are pinned to the exact installed build, including both CPU architectures; replacing only the app can produce a version mismatch. Finish or recover library operations before updating. To remove the helper, quit Maschinery and open **Maschinery-vVERSION-Remove-Helper.pkg**. Libraries, NI registrations, the app and transaction journals are retained.
+Use the same full installer for updates. Finish or recover library operations and quit Maschinery before updating. No separate component setup is required. Settings shows **Elevated privileges for installation enabled** when installation and maintenance are available. App-only DMGs from earlier releases do not set up these privileges.
 
 The installer implementation is new. Automated isolated installation/rollback tests and live ad-hoc XPC authentication probes do not replace a clean-Mac administrator installation and real-library acceptance pass. See [the helper design and acceptance checklist](docs/INSTALLER-HELPER.md).
 
@@ -28,7 +26,7 @@ The installer implementation is new. Automated isolated installation/rollback te
 
 Builds require no paid Apple Developer account. Use `SIGNING_IDENTITY=- scripts/build-app.sh`, then `scripts/package-installer.sh` to produce the full installer and helper uninstaller. Python is used only during package construction, not on the recipient's Mac. The app never runs as root. The root setup tool accepts only fixed install/recover/remove operations, and the root daemon accepts only its existing typed library operations.
 
-An existing Apple-signed development build can still use the original SMAppService path. Before migrating an enabled legacy helper, choose **Settings → Remove Helper…** in a development build, then quit and run the new installer. See [signing details](docs/SIGNING.md).
+An existing Apple-signed development build can still use the original SMAppService path. Before migrating an enabled legacy helper, unregister it using the earlier development build that provides **Settings → Remove Helper…**, then quit and run the new installer. The current interface leaves component management to the installer. See [signing details](docs/SIGNING.md).
 
 The development bundle is `dist/Maschinery.app`. The package build does not install it or alter this Mac's system helper. See [release instructions](docs/RELEASING.md).
 
@@ -97,7 +95,7 @@ Registration changes are product-scoped:
 
 Root transaction journals: `/Library/Application Support/Maschinery/Transactions` (root-owned; not group/world writable). User preferences use UserDefaults. User logs, analysis workspaces, client journals and mount receipts live below `~/Library/Application Support/Maschinery/`. ISO mounts are read-only under app-owned mount roots and detached on success, failure and cancellation. Workspace/session records support cleanup after abnormal termination. User-owned destination staging is `.maschinery-<UUID>` beside the final library.
 
-Do not manually delete a directory named in a recovery error. Restore/recover through Settings after helper authorization is available. Committed helper receipts are retained so a lost acknowledgement cannot cause a later incorrect rollback.
+Do not manually delete a directory named in a recovery error. Reopen Maschinery after installation privileges are available to retry automatic recovery. Committed helper receipts are retained so a lost acknowledgement cannot cause a later incorrect rollback.
 
 ## Validation and remaining external acceptance
 

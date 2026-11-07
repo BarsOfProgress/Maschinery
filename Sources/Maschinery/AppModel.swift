@@ -88,7 +88,6 @@ import MaschineryCore
     @AppStorage("trashSources") var trashSources = false
     @AppStorage("defaultConflict") var defaultConflict = ConflictPolicy.ask.rawValue
     @Published var helperEnabled = false
-    @AppStorage("askToEnableHelperAtLaunch") var askToEnableHelperAtLaunch = true
     private var started = false
     @Published var maintenancePlan: RepairPlan?
     @Published var relocationDestination: URL?
@@ -288,52 +287,6 @@ import MaschineryCore
         loadCatalogue()
         checkHelper()
         recover()
-        while busy {
-            do { try await Task.sleep(for: .milliseconds(150)) }
-            catch { return }
-        }
-        guard askToEnableHelperAtLaunch, XPCPrivilegedService.status != .enabled,
-              !Task.isCancelled, let window = NSApplication.shared.keyWindow else { return }
-        let alert = NSAlert()
-        alert.messageText = "Enable Full Install?"
-        alert.informativeText = "Install the Full Install .pkg to set up the helper with administrator approval. Apple-signed development builds can also enable their helper in System Settings."
-        alert.addButton(withTitle: "Enable Helper…")
-        alert.addButton(withTitle: "Not Now")
-        alert.showsSuppressionButton = true
-        alert.suppressionButton?.title = "Don’t ask again"
-        let response = await alert.beginSheetModal(for: window)
-        if response == .alertFirstButtonReturn { enableHelper() }
-        else if alert.suppressionButton?.state == .on { askToEnableHelperAtLaunch = false }
-    }
-    func enableHelper() {
-        defer { checkHelper() }
-        do {
-            try XPCPrivilegedService.enable()
-            if !InstalledHelperTrust.isPresent { SMAppService.openSystemSettingsLoginItems() }
-        }
-        catch {
-            if XPCPrivilegedService.status == .requiresApproval { SMAppService.openSystemSettingsLoginItems() }
-            else {
-                let alert = NSAlert()
-                alert.messageText = "Helper could not be enabled"
-                alert.informativeText = error.localizedDescription
-                alert.addButton(withTitle: "OK")
-                if let window = NSApplication.shared.keyWindow { alert.beginSheetModal(for: window) }
-                else { alert.runModal() }
-            }
-        }
-    }
-    func removeHelper() {
-        guard !busy else { return }
-        do { try XPCPrivilegedService.unregisterLegacyHelper(); checkHelper() }
-        catch {
-            let alert = NSAlert()
-            alert.messageText = "Remove privileged helper"
-            alert.informativeText = error.localizedDescription
-            alert.addButton(withTitle: "OK")
-            if let window = NSApplication.shared.keyWindow { alert.beginSheetModal(for: window) }
-            else { alert.runModal() }
-        }
     }
     func checkHelper() {
         helperEnabled = false

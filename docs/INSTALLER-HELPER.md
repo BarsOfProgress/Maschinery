@@ -21,11 +21,11 @@ An ad-hoc signature identifies bytes, not a publisher. The initial trust decisio
 - In-progress setup backups: `/Library/Application Support/Maschinery/HelperSetupBackup/`.
 - Existing NI operation journals: `/Library/Application Support/Maschinery/Transactions/` (retained).
 
-The package scripts run their own embedded Universal setup tool. Preparation validates the fixed payload destination before Installer writes there. Setup refuses non-startup target volumes, running app instances, unsafe paths, links, special files, multiply-linked payload files, invalid signatures and unfinished library journals. It stops the old helper and rechecks operations before swapping files. A previously enabled SMAppService helper must be unregistered first using Settings → Remove Helper in a development build.
+The package scripts run their own embedded Universal setup tool. Preparation validates the fixed payload destination before Installer writes there. Setup refuses non-startup target volumes, running app instances, unsafe paths, links, special files, multiply-linked payload files, invalid signatures and unfinished library journals. It stops the old helper and rechecks operations before swapping files. A previously enabled SMAppService helper must be unregistered first using Settings → Remove Helper in the earlier development build. The current UI shows only the elevated installation privileges status; component setup and updates belong to the full installer.
 
 Staging and backups are protected from ordinary users. Replacement uses same-volume rename; cross-volume installs fail instead of falling back to a partial copy. Before each change, setup persists recovery markers. Startup/health-check failure restores the previous app, helper and daemon. Rerunning the installer recovers interrupted setup; a committed marker permits cleanup without rolling back a successful update. Recovery data is kept when restoration fails. Do not manually delete it. Setup does not alter NI libraries or registration records.
 
-The Remove Helper package stops the service and removes its daemon and installed helper directory. It refuses running apps and pending library transactions. App, content, registrations and NI transaction journals remain available.
+For development/support only, the Remove Helper package stops the service and removes its daemon and installed helper directory. It refuses running apps and pending library transactions. App, content, registrations and NI transaction journals remain available.
 
 ## Build and verification
 
@@ -55,3 +55,5 @@ On a disposable clean macOS 14+ installation without developer credentials:
 No system daemon or real NI content has been modified by the automated validation recorded for this change.
 
 Apple references: [code requirements](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/RequirementLang/RequirementLang.html), [NSXPC peer requirements](https://developer.apple.com/documentation/foundation/nsxpcconnection/setcodesigningrequirement(_:)), [launch daemons](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html).
+
+Public releases expose only the Full Install package and checksum. Component maintenance packages are not offered as a separate user setup step. The app has no helper toggle, enable/remove controls or startup enable prompt.

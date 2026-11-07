@@ -28,15 +28,14 @@ scripts/verify-release-signatures.sh
 scripts/test-helper-trust.sh
 scripts/package-installer.sh
 scripts/verify-installer.sh
-scripts/package-dmg.sh
-archive="dist/Maschinery-v$version-macOS.dmg"
+archive="dist/Maschinery-v$version-Full-Install.pkg"
 git push origin "$branch"
 git tag -a "$tag" "$commit" -m "Maschinery $version"
 git push origin "refs/tags/$tag"
 if [[ "${SIGNING_IDENTITY:-}" == '-' ]]; then
-  notes='Universal macOS DMG (Apple Silicon and Intel), macOS 14+. Ad-hoc signed, no Developer ID or notarization. Gatekeeper may require approval in Privacy & Security. Use the Full Install .pkg for privileged features; administrator approval is required. Review this draft before publishing.'
+  notes='Universal macOS installer (Apple Silicon and Intel), macOS 14+. Ad-hoc signed, no Developer ID or notarization. Gatekeeper may require approval in Privacy & Security. Run the installer to enable installation and maintenance with administrator approval. Review this draft before publishing.'
 else
-  notes='Universal macOS DMG (Apple Silicon and Intel), macOS 14+. Signed with the existing Apple identity; not notarized. Review this draft before publishing.'
+  notes='Universal macOS installer (Apple Silicon and Intel), macOS 14+. App signed with the existing Apple identity; installer unsigned and not notarized. Review this draft before publishing.'
 fi
-gh release create "$tag" "$archive" "$archive.sha256" "dist/Maschinery-v$version-Full-Install.pkg" "dist/Maschinery-v$version-Full-Install.pkg.sha256" "dist/Maschinery-v$version-Remove-Helper.pkg" "dist/Maschinery-v$version-Remove-Helper.pkg.sha256" --verify-tag --draft \
+gh release create "$tag" "$archive" "$archive.sha256" --verify-tag --draft \
   --title "Maschinery $version" --notes "$notes"
