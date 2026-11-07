@@ -30,5 +30,10 @@ archive="dist/Maschinery-v$version-macOS.dmg"
 git push origin "$branch"
 git tag -a "$tag" "$commit" -m "Maschinery $version"
 git push origin "refs/tags/$tag"
+if [[ "${SIGNING_IDENTITY:-}" == '-' ]]; then
+  notes='Universal macOS DMG (Apple Silicon and Intel), macOS 14+. Ad-hoc signed, no Developer ID or notarization. Gatekeeper may require approval in Privacy & Security. Full Install and privileged maintenance are unavailable. Review this draft before publishing.'
+else
+  notes='Universal macOS DMG (Apple Silicon and Intel), macOS 14+. Signed with the existing Apple identity; not notarized. Review this draft before publishing.'
+fi
 gh release create "$tag" "$archive" "$archive.sha256" --verify-tag --draft \
-  --title "Maschinery $version" --notes 'Universal macOS build (Apple Silicon and Intel). Requires macOS 14 or later. Signed with the existing Apple identity; not notarized. Review this draft before publishing.'
+  --title "Maschinery $version" --notes "$notes"

@@ -18,5 +18,11 @@ jobs:
         run: scripts/build-app.sh
         env:
           SIGNING_IDENTITY: '-'
+      - name: Verify ad-hoc release signatures
+        run: scripts/verify-release-signatures.sh
+        env:
+          SIGNING_IDENTITY: '-'
+      - name: Check ad-hoc helper trust limitation
+        run: swift scripts/check-adhoc-helper.swift dist/Maschinery.app
       - name: Package and verify DMG
         run: scripts/package-dmg.sh

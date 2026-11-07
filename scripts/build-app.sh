@@ -54,12 +54,12 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 </dict></plist>
 PLIST
 if [[ "$identity" == '-' ]]; then
-  codesign --force --sign - --identifier local.maschinery.helper "$app/Contents/Library/LaunchServices/MaschineryHelper"
-  codesign --force --sign - "$app"
+  codesign --force --preserve-metadata=entitlements --sign - --identifier local.maschinery.helper "$app/Contents/Library/LaunchServices/MaschineryHelper"
+  codesign --force --preserve-metadata=entitlements --sign - --identifier local.maschinery.app "$app"
 else
-  codesign --force --options runtime --timestamp --sign "$identity" "${keychain_args[@]}" --identifier local.maschinery.helper "$app/Contents/Library/LaunchServices/MaschineryHelper"
-  codesign --force --options runtime --timestamp --sign "$identity" "${keychain_args[@]}" "$app"
+  codesign --force --preserve-metadata=entitlements --options runtime --timestamp --sign "$identity" "${keychain_args[@]}" --identifier local.maschinery.helper "$app/Contents/Library/LaunchServices/MaschineryHelper"
+  codesign --force --preserve-metadata=entitlements --options runtime --timestamp --sign "$identity" "${keychain_args[@]}" "$app"
 fi
-codesign --verify --deep --strict "$app"
+codesign --verify --deep --strict --verbose=2 --all-architectures "$app"
 lipo -archs "$app/Contents/Library/LaunchServices/MaschineryHelper"
 lipo -archs "$app/Contents/MacOS/Maschinery"

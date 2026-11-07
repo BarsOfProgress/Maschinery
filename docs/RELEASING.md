@@ -1,47 +1,43 @@
-# Maschinery DMG releases
+# Maschinery DMG releases without a paid Apple account
 
-The macOS distribution is `Maschinery-vVERSION-macOS.dmg`, accompanied by a SHA-256 checksum. Open it and drag **Maschinery.app** onto **Applications**. The image contains the app and an `Applications` symlink to `/Applications`; it is compressed, read-only UDZO with zlib level 9.
+GitHub releases require **no Apple certificates, signing secrets, paid membership, Developer ID or notarization credentials**. The macOS distribution is `Maschinery-vVERSION-macOS.dmg` plus its SHA-256 checksum. It contains the Universal 2 app and an `Applications` symlink to `/Applications`, compressed read-only as UDZO with zlib level 9.
 
-`scripts/package-dmg.sh` copies the already-built app using `ditto`, preserving its bundle and signature. It creates the image with Apple's native `hdiutil`, verifies it with `hdiutil verify`, and only then moves it to `dist/`. Creation or verification errors stop the release. An EXIT trap removes temporary staging data on success and failure. It never edits the app, signs it again, or touches other operating systems' artifacts.
+## GitHub Actions
 
-## Local release with the existing Keychain
+`.github/workflows/release.yml` runs on **macos-15** when a `v*` tag is pushed, or manually from Actions with an existing release tag. Use a new tag containing these workflow/script changes; do not move older release tags. The tag must match the checked-out commit and compiled app version.
 
-The existing local signing path remains available, with no GitHub signing secrets or certificate export required:
+The workflow runs the existing XCTest suite and Release build for **arm64 and x86_64**. `SIGNING_IDENTITY=-` explicitly selects ad-hoc signing. The helper is signed first, then the outer app; existing entitlements are preserved when re-signing, and bundle IDs, helper plist/Mach service configuration and XPC security requirements remain unchanged. The project currently has no separate entitlement files or additional bundled executable components beyond the app and helper.
+
+`scripts/verify-release-signatures.sh` checks deep/strict validity, both architectures, expected identifiers and ad-hoc signatures. A read-only Security-framework probe checks the helper trust limitation. The workflow then packages the DMG, verifies it with `hdiutil verify`, generates a SHA-256 sidecar and uses `gh release create` or `gh release upload` to attach both assets to a **draft** GitHub Release. Review the draft before publishing. It refuses asset overwrites and published-release modifications and does not delete other platform artifacts. Any failed test, build, signing check, packaging, verification or upload fails the job.
+
+The automatic `GITHUB_TOKEN` has `contents: write`; no PAT or Apple GitHub Secrets are required. The **release** GitHub environment may have reviewers/deployment rules configured by the repository owner. Old certificate secrets, if present, are not accessed and may be removed manually. No certificate, Keychain import or notarization step runs.
+
+## Local releases
+
+Install GitHub CLI and authenticate (`gh auth login`), update version metadata/app labels/report version, and commit the intended sources. Run:
 
 ```sh
-scripts/release.sh
+SIGNING_IDENTITY=- scripts/release.sh
 ```
 
-Install GitHub CLI (`brew install gh`) and authenticate (`gh auth login`) first. Commit the intended sources and version changes. The command requires a clean working tree, runs XCTest, builds Release binaries for **arm64 and x86_64**, signs the app and helper using `build-app.sh`, verifies their Apple identities and matching Team IDs, packages and verifies the DMG, pushes the branch and new annotated version tag, and creates a **draft** GitHub Release containing the DMG and checksum. It refuses existing local version tags, ad-hoc signatures, force-pushes and asset overwrites.
+This uses the same tests, Universal 2 build, verification, DMG packaging, checksum and draft upload, then pushes the branch and annotated version tag. Choose either this route or hosted release creation for a given tag; both refuse overwriting existing assets. A local tag push can also trigger the hosted workflow, which will refuse a duplicate asset rather than replace it. Existing Apple-signed development builds remain available by supplying the real `SIGNING_IDENTITY` and optional `SIGNING_KEYCHAIN`; no credentials are altered by these changes.
 
-`SIGNING_IDENTITY` and optional `SIGNING_KEYCHAIN` retain their existing meanings. The app version is read from its Info.plist; update build metadata, Xcode project/generator, app labels and report version together before a release. The current `v1.0.1` tag already exists; do not move it to new source. Bump the version for the next release.
-
-For packaging only, after building:
+For packaging an existing ad-hoc app only:
 
 ```sh
-scripts/verify-release-signatures.sh
+SIGNING_IDENTITY=- scripts/verify-release-signatures.sh
+swift scripts/check-adhoc-helper.swift dist/Maschinery.app
 scripts/package-dmg.sh
 ```
 
-## GitHub Actions release workflow
+The packager copies the app with `ditto` without changing its signature or resources, creates an `Applications` shortcut and UDZO image with native `hdiutil`, verifies it, then moves it into `dist/`. An EXIT trap removes staging data on success and failure. A failed creation or verification does not become a release artifact. Neither the app nor DMG is notarized; the DMG itself is not signed.
 
-`.github/workflows/release.yml` runs on **macos-15**, when a `v*` tag is pushed, or manually via **Actions → Maschinery — macOS DMG release → Run workflow** with an existing tag. It checks that the tag matches both the checkout and compiled app version, runs XCTest, builds the same signed Universal 2 app/helper, packages and verifies the DMG, then uses the existing `gh release create` / `gh release upload` mechanism to attach it to a draft release. It does not publish automatically, overwrite assets, modify published releases or delete any existing assets, including other platforms' files. Historical ZIPs are left untouched; new macOS releases use DMGs.
+## Privileged helper limitation
 
-For hosted signing, configure the **release** GitHub environment with:
+The current shipped implementation cannot authorize its privileged helper with ad-hoc signing. `HelperIdentity.team()` rejects code without an Apple Team ID **before** calling `SMAppService.register()`. Both sides of XPC additionally require `anchor apple generic` and the matching certificate Team ID. The read-only `check-adhoc-helper.swift` probe on the actual ad-hoc app and helper confirms absent Team IDs and rejection of even the Apple-anchor/identifier portion of that trust requirement. The workflow runs this probe too.
 
-| Secret | Value |
-| --- | --- |
-| `MACOS_CERTIFICATE_P12_BASE64` | Base64-encoded password-protected `.p12` containing an existing Apple Development or Developer ID Application identity **and its private key** |
-| `MACOS_CERTIFICATE_PASSWORD` | Password for that `.p12` |
+Thus **Full Install and helper-dependent maintenance are unavailable**. Analysis, Extract Only, Library browsing/catalogue/artwork and nonprivileged workflows remain available. Approving Gatekeeper is separate from helper authorization. We did not weaken the privileged XPC policy, introduce root/sudo fallbacks or register a replacement system daemon. Raw operating-system acceptance of an ad-hoc SMAppService daemon has **not** been tested: this app's preflight prevents reaching that call, and no standalone SMAppService compatibility is claimed.
 
-This is optional setup performed by the certificate owner. No certificates or credentials are created, exported, changed or revoked by this repository change. If you choose to configure hosted signing, transfer the existing identity securely; never commit the `.p12`, its encoding or password. Each run imports it into a temporary runner Keychain and deletes that Keychain and import file afterwards. No signing secrets are needed for the local release path.
+## Gatekeeper
 
-With no certificate secret configured, the release workflow fails with an explicit setup message and uploads nothing. With multiple signing identities in the imported file, the existing build script refuses ambiguous selection; supply a `.p12` with the intended identity. The automatic `GITHUB_TOKEN` is granted `contents: write` for release uploads; a separate GitHub PAT is not required. Configure required reviewers and restrict deployment tags in the **release** environment as appropriate. GitHub's [manual workflow instructions](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow) describe dispatching releases.
-
-A tag pushed by the local release script can also trigger the hosted workflow. Use the local route without hosted signing secrets, or the hosted route with secrets, rather than running both for the same tag: neither path overwrites an existing asset. To retry a failed upload, inspect the draft and upload the missing DMG/checksum explicitly; do not delete or replace published tags.
-
-## CI and signing status
-
-`.github/workflows/ci.yml` still runs on source pushes and pull requests on a GitHub-hosted Mac: XCTest, the existing Universal 2 Release build, then DMG creation and verification. CI uses **ad-hoc signing only for validation**, does not publish a downloadable release, and does not enable Full Install.
-
-Real releases require a verified Apple Development or Developer ID Application signature on both app and helper. An Apple Development signature is not Developer ID distribution or notarization. There was no notarization step to preserve; these releases explicitly say **not notarized**. No notarization secrets, dummy credentials or claims of notarization are introduced. The disk image itself is not separately signed or notarized. Existing stapled app tickets, if supplied in a future build, are preserved by packaging. Full Install still requires approving the signed helper on the destination Mac.
+Downloaded ad-hoc builds are not identified-developer distributions or notarized. After copying the app to Applications and attempting to open it, users who trust it can approve it in **System Settings → Privacy & Security → Open Anyway**, then confirm **Open**. This does not enable Full Install. See [Apple's instructions](https://support.apple.com/en-us/102445). No global security setting changes or quarantine-removal commands are required by these instructions.

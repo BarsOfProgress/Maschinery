@@ -21,6 +21,7 @@ jobs:
     env:
       RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
       GH_TOKEN: ${{ github.token }}
+      SIGNING_IDENTITY: '-'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,32 +32,9 @@ jobs:
         run: |
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 1
           test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$(git rev-parse HEAD)"
-      - name: Import existing signing identity into a temporary keychain
-        shell: bash
-        env:
-          CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
-          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-        run: |
-          set -euo pipefail
-          if [[ -z "$CERTIFICATE_BASE64" ]]; then
-            echo '::error::Configure MACOS_CERTIFICATE_P12_BASE64 and MACOS_CERTIFICATE_PASSWORD in the release environment, or use scripts/release.sh on the signing Mac. No unsigned release will be published.'
-            exit 1
-          fi
-          keychain="$RUNNER_TEMP/maschinery-release.keychain-db"
-          certificate="$RUNNER_TEMP/maschinery-signing.p12"
-          keychain_password=$(openssl rand -hex 32)
-          echo "::add-mask::$keychain_password"
-          trap 'rm -f "$certificate"' EXIT
-          printf '%s' "$CERTIFICATE_BASE64" | /usr/bin/base64 --decode > "$certificate"
-          security create-keychain -p "$keychain_password" "$keychain"
-          security set-keychain-settings -lut 3600 "$keychain"
-          security unlock-keychain -p "$keychain_password" "$keychain"
-          security import "$certificate" -P "$CERTIFICATE_PASSWORD" -k "$keychain" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain" >/dev/null
-          echo "SIGNING_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
       - name: Run XCTest
         run: scripts/test-native.sh
-      - name: Build signed Universal 2 Release app and helper
+      - name: Build ad-hoc signed Universal 2 Release app and helper
         run: scripts/build-app.sh
       - name: Verify release signatures and version
         shell: bash
@@ -64,6 +42,8 @@ jobs:
           scripts/verify-release-signatures.sh
           version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' dist/Maschinery.app/Contents/Info.plist)
           test "$RELEASE_TAG" = "v$version"
+      - name: Check ad-hoc helper trust limitation
+        run: swift scripts/check-adhoc-helper.swift dist/Maschinery.app
       - name: Package and verify DMG
         run: scripts/package-dmg.sh
       - name: Attach DMG and checksum to draft release
@@ -78,12 +58,5 @@ jobs:
           else
             gh release create "$RELEASE_TAG" "$dmg" "$dmg.sha256" --verify-tag --draft \
               --title "Maschinery ${RELEASE_TAG#v}" \
-              --notes 'Universal macOS DMG (Apple Silicon and Intel), macOS 14+. Open the disk image and drag Maschinery to Applications. The app and helper have verified Apple signatures. Not notarized. Review this draft before publishing.'
+              --notes 'Universal macOS DMG (Apple Silicon and Intel), macOS 14+. Open the disk image and drag Maschinery to Applications. Ad-hoc signed; no Developer ID or notarization. Gatekeeper may require approval in Privacy & Security. Full Install and privileged maintenance are unavailable in this build. Review this draft before publishing.'
           fi
-      - name: Clean up signing keychain
-        if: always()
-        shell: bash
-        run: |
-          keychain="$RUNNER_TEMP/maschinery-release.keychain-db"
-          if [[ -f "$keychain" ]]; then security delete-keychain "$keychain"; fi
-          rm -f "$RUNNER_TEMP/maschinery-signing.p12"

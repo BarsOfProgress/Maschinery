@@ -70,3 +70,7 @@ spctl --assess --type execute --verbose=4 'dist/Maschinery.app'
 ```
 
 To move/remove a previously authorized app, first disable its background item in System Settings. Re-register after installing a newly signed version at its final path. No launchd files are manually installed with sudo.
+
+## Certificate-free GitHub distribution
+
+GitHub releases now use explicit ad-hoc signing (`SIGNING_IDENTITY=-`), with no certificate secrets or notarization. The original Apple-identity instructions above apply to development/helper-enabled builds. Ad-hoc release signatures pass integrity verification but do not satisfy the existing helper Team ID / Apple-anchor checks. Full Install and privileged maintenance are unavailable in those releases. See [release configuration and limitations](RELEASING.md).

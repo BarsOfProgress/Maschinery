@@ -1,5 +1,11 @@
 # Validation evidence — 2026-10-28
 
+## Ad-hoc release distribution — 2026-11-07
+
+A full Universal 2 Release build completed using `SIGNING_IDENTITY=-`, with helper signed before app and entitlements retained on re-signing. Deep strict verification and per-architecture checks passed for both binaries, including expected identifiers and ad-hoc signature type. Native XCTest: 111 started, 110 passed, one live-store test skipped, zero failures. UDZO creation, `hdiutil verify` and checksum generation passed.
+
+A read-only Security-framework probe of the actual app and embedded helper confirmed both lack Team IDs and both fail the Apple-anchor/identifier trust requirement with `errSecCSReqFailed` (-67050). The unchanged production helper preflight rejects that missing Team ID before invoking SMAppService registration, so no helper compatibility is claimed. Raw ad-hoc daemon registration and privileged operations were not attempted. No certificate or provisioning credentials were modified. Hosted release secrets/imports were removed; release notes and README now identify ad-hoc signatures, no notarization, Gatekeeper approval and unavailable privileged features.
+
 ## DMG release packaging — 2026-11-07
 
 The shared native hdiutil packager produced `Maschinery-v1.0.1-macOS.dmg` with UDZO/zlib compression and passed `hdiutil verify`. Read-only mounting confirmed the app and exact `Applications -> /Applications` symlink; deep strict all-architecture signature verification passed inside the mounted app, and both app/helper contained x86_64 and arm64. The SHA-256 sidecar validated. The temporary packaging directory was removed, and the verification mount was detached. Existing signing configuration remains unchanged; no certificates were exported or altered and no notarization was performed. The hosted release path requires user-configured signing secrets and has not been exercised with those credentials.

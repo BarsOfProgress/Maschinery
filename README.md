@@ -12,9 +12,18 @@ Version 1.0.2 (build 1).
 
 Native SwiftUI companion for bulk Maschine library installation, extraction, auditing, repair and relocation. macOS 14+, Universal 2. Independent utility; not affiliated with or endorsed by Native Instruments.
 
+## Install the macOS release
+
+1. Download the DMG and its SHA-256 checksum from [GitHub Releases](https://github.com/BarsOfProgress/Maschinery/releases).
+2. Open the DMG and drag **Maschinery.app** onto **Applications**, then eject the disk image.
+3. Open Maschinery from Applications. Because it is ad-hoc signed and not notarized, macOS Gatekeeper may block it.
+4. If you trust the download, after attempting to open it go to **System Settings → Privacy & Security**, scroll to **Security**, click **Open Anyway**, authenticate if prompted, then confirm **Open**. This is an exception for this app; do not disable Gatekeeper globally. See [Apple's instructions](https://support.apple.com/en-us/102445).
+
+Analysis, Extract Only, Library browsing/catalogue/artwork, and operations that do not require the privileged helper remain available. Full Install and helper-dependent repair, removal or relocation cannot be authorized in the ad-hoc release.
+
 ## Development build
 
-The Full Install implementation is enabled. The app embeds an SMAppService launch daemon and uses authenticated XPC for NI system registration. **Ad-hoc builds cannot authorize that daemon.** Sign both executables with your Apple team and approve the helper in System Settings to perform system installation or maintenance. No root GUI, Terminal password prompt or sudo fallback exists. See [exact signing instructions](docs/SIGNING.md).
+GitHub release builds use **ad-hoc signing**, require no paid Apple Developer account, and are **not Developer ID signed or notarized**. The app embeds an SMAppService launch daemon, but the existing helper security checks require an Apple Team ID and Apple-anchored signatures. **Full Install and privileged maintenance are unavailable in ad-hoc builds.** Gatekeeper approval does not enable the helper. Development builds signed with a suitable existing Apple identity retain the original helper path; see [signing details](docs/SIGNING.md). No root GUI, Terminal password prompt or sudo fallback exists.
 
 Analysis, Extract Only, artwork, XML import, offline mode, audit and logs work without helper authorization. Registered installs and maintenance are tested against isolated filesystem roots using exactly the registration engine linked into the daemon. System authorization and root-owned filesystem behavior still require acceptance on a signed build; they are not claimed as tested here.
 
