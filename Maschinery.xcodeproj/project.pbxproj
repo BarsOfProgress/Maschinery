@@ -1,0 +1,932 @@
+// !$*UTF8*$!
+{
+	"classes" = {
+	};
+	"objectVersion" = "56";
+	"archiveVersion" = "1";
+	"objects" = {
+		"0000000000000000000000C2" = {
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = (
+				"0000000000000000000000C0",
+				"0000000000000000000000C1",
+			);
+		};
+		"00000000000000000000007B" = {
+			"path" = "Sources/MaschineryCore/SecureDirectory.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000076" = {
+			"path" = "Sources/MaschineryCore/Processes.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000070" = {
+			"path" = "Sources/MaschineryCore/Installation.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000BD" = {
+			"productType" = "com.apple.product-type.application";
+			"productReference" = "000000000000000000000083";
+			"buildConfigurationList" = "0000000000000000000000BA";
+			"productName" = "Maschinery";
+			"isa" = "PBXNativeTarget";
+			"buildPhases" = (
+				"0000000000000000000000AF",
+				"0000000000000000000000B1",
+				"0000000000000000000000B3",
+				"0000000000000000000000B5",
+				"0000000000000000000000B7",
+			);
+			"dependencies" = (
+				"0000000000000000000000BB",
+				"0000000000000000000000BC",
+			);
+			"name" = "Maschinery";
+			"buildRules" = (
+			);
+		};
+		"00000000000000000000D000" = {
+			"path" = "Sources/MaschineryCore/ExpansionCatalogue.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000B8" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SWIFT_INCLUDE_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
+				"MARKETING_VERSION" = "1.0.1";
+				"DEVELOPMENT_TEAM" = "F75CB2ST8Q";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"CURRENT_PROJECT_VERSION" = "1";
+				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.music";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "local.maschinery.app";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"DEAD_CODE_STRIPPING" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"INFOPLIST_KEY_CFBundleIconFile" = "AppIcon";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"ALWAYS_SEARCH_USER_PATHS" = "NO";
+				"SDKROOT" = "macosx";
+				"SWIFT_VERSION" = "6.0";
+				"PRODUCT_NAME" = "Maschinery";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"CLANG_ENABLE_OBJC_WEAK" = "YES";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+			};
+			"name" = "Debug";
+		};
+		"00000000000000000000D006" = {
+			"path" = "Sources/MaschineryCore/Resources/ExpansionCatalogue.json";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.json";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000009A" = {
+			"fileRef" = "00000000000000000000007C";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000006B" = {
+			"path" = "Sources/MaschineryCore/Artwork.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000095" = {
+			"fileRef" = "000000000000000000000077";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000066" = {
+			"path" = "Sources/Maschinery/MaschineryApp.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000B2" = {
+			"fileRef" = "000000000000000000000081";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000AD" = {
+			"fileRef" = "000000000000000000000066";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000A8" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"CLANG_ENABLE_OBJC_WEAK" = "YES";
+				"DEVELOPMENT_TEAM" = "F75CB2ST8Q";
+				"DEAD_CODE_STRIPPING" = "YES";
+				"SKIP_INSTALL" = "YES";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CREATE_INFOPLIST_SECTION_IN_BINARY" = "YES";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"ALWAYS_SEARCH_USER_PATHS" = "NO";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"PRODUCT_NAME" = "MaschineryHelper";
+				"SDKROOT" = "macosx";
+				"SWIFT_VERSION" = "6.0";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "local.maschinery.helper";
+				"SWIFT_INCLUDE_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+			};
+			"name" = "Release";
+		};
+		"0000000000000000000000A2" = {
+			"productType" = "com.apple.product-type.library.static";
+			"productReference" = "000000000000000000000084";
+			"buildConfigurationList" = "0000000000000000000000A1";
+			"productName" = "MaschineryCore";
+			"isa" = "PBXNativeTarget";
+			"buildPhases" = (
+				"00000000000000000000009E",
+			);
+			"dependencies" = (
+			);
+			"name" = "MaschineryCore";
+			"buildRules" = (
+			);
+		};
+		"00000000000000000000008A" = {
+			"fileRef" = "00000000000000000000006C";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000085" = {
+			"path" = "MaschineryHelper";
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "compiled.mach-o.executable";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"0000000000000000000000C1" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"CLANG_WARN_SUSPICIOUS_MOVE" = "YES";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF" = "YES";
+				"CLANG_WARN__DUPLICATE_METHOD_MATCH" = "YES";
+				"SWIFT_COMPILATION_MODE" = "wholemodule";
+				"CLANG_WARN_INFINITE_RECURSION" = "YES";
+				"DEAD_CODE_STRIPPING" = "YES";
+				"SDKROOT" = "macosx";
+				"CLANG_WARN_BOOL_CONVERSION" = "YES";
+				"CLANG_WARN_UNREACHABLE_CODE" = "YES";
+				"ENABLE_STRICT_OBJC_MSGSEND" = "YES";
+				"CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING" = "YES";
+				"CLANG_WARN_STRICT_PROTOTYPES" = "YES";
+				"CLANG_WARN_ENUM_CONVERSION" = "YES";
+				"GCC_WARN_64_TO_32_BIT_CONVERSION" = "YES";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "YES";
+				"STRING_CATALOG_GENERATE_SYMBOLS" = "YES";
+				"SWIFT_VERSION" = "6.0";
+				"GCC_WARN_UNINITIALIZED_AUTOS" = "YES";
+				"ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS" = "YES";
+				"GCC_WARN_ABOUT_RETURN_TYPE" = "YES";
+				"CLANG_WARN_EMPTY_BODY" = "YES";
+				"CLANG_WARN_COMMA" = "YES";
+				"GCC_WARN_UNUSED_VARIABLE" = "YES";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"CLANG_WARN_RANGE_LOOP_ANALYSIS" = "YES";
+				"GCC_NO_COMMON_BLOCKS" = "YES";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"CLANG_WARN_INT_CONVERSION" = "YES";
+				"ALWAYS_SEARCH_USER_PATHS" = "NO";
+				"CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS" = "YES";
+				"CLANG_WARN_CONSTANT_CONVERSION" = "YES";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"CLANG_WARN_NON_LITERAL_NULL_CONVERSION" = "YES";
+				"GCC_WARN_UNUSED_FUNCTION" = "YES";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+				"CLANG_WARN_OBJC_LITERAL_CONVERSION" = "YES";
+				"GCC_WARN_UNDECLARED_SELECTOR" = "YES";
+			};
+			"name" = "Release";
+		};
+		"00000000000000000000007A" = {
+			"path" = "Sources/MaschineryCore/Reporting.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000075" = {
+			"path" = "Sources/MaschineryCore/MountRecovery.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000BC" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "0000000000000000000000AB";
+			"targetProxy" = "98E8A0473092B10900068C89";
+		};
+		"98E8A0483092B10900068C89" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "0000000000000000000000C3";
+			"remoteGlobalIDString" = "0000000000000000000000A2";
+			"remoteInfo" = "MaschineryCore";
+			"proxyType" = "1";
+		};
+		"0000000000000000000000B7" = {
+			"buildActionMask" = "2147483647";
+			"dstSubfolderSpec" = "1";
+			"isa" = "PBXCopyFilesBuildPhase";
+			"runOnlyForDeploymentPostprocessing" = "0";
+			"dstPath" = "Contents/Library/LaunchDaemons";
+			"name" = "Embed Launch Daemon";
+			"files" = (
+				"0000000000000000000000B6",
+			);
+		};
+		"00000000000000000000009F" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+				"CLANG_ENABLE_OBJC_WEAK" = "YES";
+				"DEAD_CODE_STRIPPING" = "YES";
+				"DEFINES_MODULE" = "YES";
+				"SKIP_INSTALL" = "YES";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS" = "gnu17 gnu++14";
+				"ALWAYS_SEARCH_USER_PATHS" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
+				"PRODUCT_NAME" = "MaschineryCore";
+				"SWIFT_VERSION" = "6.0";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_MODULE_VERIFIER" = "YES";
+				"SWIFT_INCLUDE_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
+				"SDKROOT" = "macosx";
+			};
+			"name" = "Debug";
+		};
+		"00000000000000000000D005" = {
+			"fileRef" = "00000000000000000000D004";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000006A" = {
+			"path" = "Sources/MaschineryCore/ArchiveExtraction.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000094" = {
+			"fileRef" = "000000000000000000000076";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000065" = {
+			"path" = "Sources/Maschinery/AppModel.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000B1" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = (
+				"0000000000000000000000B0",
+			);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"0000000000000000000000AC" = {
+			"fileRef" = "000000000000000000000065";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000A7" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"CLANG_ENABLE_OBJC_WEAK" = "YES";
+				"DEVELOPMENT_TEAM" = "F75CB2ST8Q";
+				"DEAD_CODE_STRIPPING" = "YES";
+				"SKIP_INSTALL" = "YES";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CREATE_INFOPLIST_SECTION_IN_BINARY" = "YES";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"ALWAYS_SEARCH_USER_PATHS" = "NO";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"PRODUCT_NAME" = "MaschineryHelper";
+				"SDKROOT" = "macosx";
+				"SWIFT_VERSION" = "6.0";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "local.maschinery.helper";
+				"SWIFT_INCLUDE_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+			};
+			"name" = "Debug";
+		};
+		"00000000000000000000008F" = {
+			"fileRef" = "000000000000000000000071";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000A1" = {
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = (
+				"00000000000000000000009F",
+				"0000000000000000000000A0",
+			);
+		};
+		"000000000000000000000084" = {
+			"path" = "libMaschineryCore.a";
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "archive.ar";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"0000000000000000000000C0" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"CLANG_WARN_SUSPICIOUS_MOVE" = "YES";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF" = "YES";
+				"CLANG_WARN__DUPLICATE_METHOD_MATCH" = "YES";
+				"CLANG_WARN_INFINITE_RECURSION" = "YES";
+				"DEAD_CODE_STRIPPING" = "YES";
+				"SDKROOT" = "macosx";
+				"ENABLE_TESTABILITY" = "YES";
+				"CLANG_WARN_BOOL_CONVERSION" = "YES";
+				"CLANG_WARN_UNREACHABLE_CODE" = "YES";
+				"ENABLE_STRICT_OBJC_MSGSEND" = "YES";
+				"CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING" = "YES";
+				"CLANG_WARN_STRICT_PROTOTYPES" = "YES";
+				"CLANG_WARN_ENUM_CONVERSION" = "YES";
+				"GCC_WARN_64_TO_32_BIT_CONVERSION" = "YES";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "YES";
+				"STRING_CATALOG_GENERATE_SYMBOLS" = "YES";
+				"SWIFT_VERSION" = "6.0";
+				"GCC_WARN_UNINITIALIZED_AUTOS" = "YES";
+				"ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS" = "YES";
+				"GCC_WARN_ABOUT_RETURN_TYPE" = "YES";
+				"CLANG_WARN_EMPTY_BODY" = "YES";
+				"CLANG_WARN_COMMA" = "YES";
+				"GCC_WARN_UNUSED_VARIABLE" = "YES";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"CLANG_WARN_RANGE_LOOP_ANALYSIS" = "YES";
+				"GCC_NO_COMMON_BLOCKS" = "YES";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"CLANG_WARN_INT_CONVERSION" = "YES";
+				"ALWAYS_SEARCH_USER_PATHS" = "NO";
+				"CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS" = "YES";
+				"CLANG_WARN_CONSTANT_CONVERSION" = "YES";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"CLANG_WARN_NON_LITERAL_NULL_CONVERSION" = "YES";
+				"GCC_WARN_UNUSED_FUNCTION" = "YES";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+				"CLANG_WARN_OBJC_LITERAL_CONVERSION" = "YES";
+				"GCC_WARN_UNDECLARED_SELECTOR" = "YES";
+			};
+			"name" = "Debug";
+		};
+		"00000000000000000000007F" = {
+			"path" = "Sources/SafeArchive/SafeArchive.c";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.c.c";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"98E8A0463092B10900068C89" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "0000000000000000000000C3";
+			"remoteGlobalIDString" = "0000000000000000000000A2";
+			"remoteInfo" = "MaschineryCore";
+			"proxyType" = "1";
+		};
+		"98E8A0473092B10900068C89" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "0000000000000000000000C3";
+			"remoteGlobalIDString" = "0000000000000000000000AB";
+			"remoteInfo" = "MaschineryHelper";
+			"proxyType" = "1";
+		};
+		"000000000000000000000074" = {
+			"path" = "Sources/MaschineryCore/Models.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000BB" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "0000000000000000000000A2";
+			"targetProxy" = "98E8A0463092B10900068C89";
+		};
+		"00000000000000000000D004" = {
+			"path" = "Sources/MaschineryCore/OfficialArtworkCache.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000B6" = {
+			"fileRef" = "000000000000000000000082";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000009E" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = (
+				"000000000000000000000086",
+				"000000000000000000000087",
+				"000000000000000000000088",
+				"000000000000000000000089",
+				"00000000000000000000008A",
+				"00000000000000000000008B",
+				"00000000000000000000008C",
+				"00000000000000000000008D",
+				"00000000000000000000008E",
+				"00000000000000000000008F",
+				"000000000000000000000090",
+				"000000000000000000000091",
+				"000000000000000000000092",
+				"000000000000000000000093",
+				"000000000000000000000094",
+				"000000000000000000000095",
+				"000000000000000000000096",
+				"000000000000000000000097",
+				"000000000000000000000098",
+				"000000000000000000000099",
+				"00000000000000000000009A",
+				"00000000000000000000009B",
+				"00000000000000000000009C",
+				"00000000000000000000009D",
+				"00000000000000000000D001",
+				"00000000000000000000D003",
+				"00000000000000000000D005",
+				"00000000000000000000E001",
+			);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"0000000000000000000000B0" = {
+			"fileRef" = "000000000000000000000084";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000099" = {
+			"fileRef" = "00000000000000000000007B";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000093" = {
+			"fileRef" = "000000000000000000000075";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000006F" = {
+			"path" = "Sources/MaschineryCore/HelperConnection.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000AB" = {
+			"productType" = "com.apple.product-type.tool";
+			"productReference" = "000000000000000000000085";
+			"buildConfigurationList" = "0000000000000000000000A9";
+			"productName" = "MaschineryHelper";
+			"isa" = "PBXNativeTarget";
+			"buildPhases" = (
+				"0000000000000000000000A4",
+				"0000000000000000000000A6",
+			);
+			"dependencies" = (
+				"0000000000000000000000AA",
+			);
+			"name" = "MaschineryHelper";
+			"buildRules" = (
+			);
+		};
+		"0000000000000000000000A6" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = (
+				"0000000000000000000000A5",
+			);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"00000000000000000000008E" = {
+			"fileRef" = "000000000000000000000070";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000A0" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+				"CLANG_ENABLE_OBJC_WEAK" = "YES";
+				"DEAD_CODE_STRIPPING" = "YES";
+				"DEFINES_MODULE" = "YES";
+				"SKIP_INSTALL" = "YES";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS" = "gnu17 gnu++14";
+				"ALWAYS_SEARCH_USER_PATHS" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"HEADER_SEARCH_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
+				"PRODUCT_NAME" = "MaschineryCore";
+				"SWIFT_VERSION" = "6.0";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_MODULE_VERIFIER" = "YES";
+				"SWIFT_INCLUDE_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
+				"SDKROOT" = "macosx";
+			};
+			"name" = "Release";
+		};
+		"000000000000000000000089" = {
+			"fileRef" = "00000000000000000000006B";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000083" = {
+			"path" = "Maschinery.app";
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.application";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"00000000000000000000007E" = {
+			"path" = "Sources/MaschineryCore/SourceIdentity.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000079" = {
+			"path" = "Sources/MaschineryCore/RegistrationEngine.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000073" = {
+			"path" = "Sources/MaschineryCore/Metadata.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000D003" = {
+			"fileRef" = "00000000000000000000D002";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000BA" = {
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = (
+				"0000000000000000000000B8",
+				"0000000000000000000000B9",
+			);
+		};
+		"0000000000000000000000B5" = {
+			"buildActionMask" = "2147483647";
+			"dstSubfolderSpec" = "1";
+			"isa" = "PBXCopyFilesBuildPhase";
+			"runOnlyForDeploymentPostprocessing" = "0";
+			"dstPath" = "Contents/Library/LaunchServices";
+			"name" = "Embed Privileged Helper";
+			"files" = (
+				"0000000000000000000000B4",
+			);
+		};
+		"00000000000000000000009D" = {
+			"fileRef" = "00000000000000000000007F";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000006E" = {
+			"path" = "Sources/MaschineryCore/FileSystem.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000098" = {
+			"fileRef" = "00000000000000000000007A";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000092" = {
+			"fileRef" = "000000000000000000000074";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000069" = {
+			"path" = "Sources/MaschineryCore/AnalysisRecovery.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000AA" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "0000000000000000000000A2";
+			"targetProxy" = "98E8A0483092B10900068C89";
+		};
+		"0000000000000000000000A5" = {
+			"fileRef" = "000000000000000000000084";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000008D" = {
+			"fileRef" = "00000000000000000000006F";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000088" = {
+			"fileRef" = "00000000000000000000006A";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000082" = {
+			"path" = "Helper/local.maschinery.helper.plist";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.plist.xml";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000007D" = {
+			"path" = "Sources/MaschineryCore/SharedPermissions.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000078" = {
+			"path" = "Sources/MaschineryCore/Registration.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000072" = {
+			"path" = "Sources/MaschineryCore/Maintenance.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000BF" = {
+			"isa" = "PBXGroup";
+			"sourceTree" = "<group>";
+			"children" = (
+				"000000000000000000000065",
+				"000000000000000000000066",
+				"000000000000000000000067",
+				"000000000000000000000068",
+				"000000000000000000000069",
+				"00000000000000000000006A",
+				"00000000000000000000006B",
+				"00000000000000000000006C",
+				"00000000000000000000006D",
+				"00000000000000000000006E",
+				"00000000000000000000006F",
+				"000000000000000000000070",
+				"000000000000000000000071",
+				"000000000000000000000072",
+				"000000000000000000000073",
+				"000000000000000000000074",
+				"000000000000000000000075",
+				"000000000000000000000076",
+				"000000000000000000000077",
+				"000000000000000000000078",
+				"000000000000000000000079",
+				"00000000000000000000007A",
+				"00000000000000000000007B",
+				"00000000000000000000007C",
+				"00000000000000000000007D",
+				"00000000000000000000007E",
+				"000000000000000000000080",
+				"00000000000000000000007F",
+				"000000000000000000000081",
+				"000000000000000000000082",
+				"0000000000000000000000BE",
+				"00000000000000000000D000",
+				"00000000000000000000D002",
+				"00000000000000000000D004",
+				"00000000000000000000D006",
+				"00000000000000000000E000",
+			);
+		};
+		"00000000000000000000D002" = {
+			"path" = "Sources/MaschineryCore/LibraryCatalogue.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000B4" = {
+			"fileRef" = "000000000000000000000085";
+			"isa" = "PBXBuildFile";
+			"settings" = {
+				"ATTRIBUTES" = (
+					"CodeSignOnCopy",
+				);
+			};
+		};
+		"00000000000000000000009C" = {
+			"fileRef" = "00000000000000000000007E";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000006D" = {
+			"path" = "Sources/MaschineryCore/Background.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000097" = {
+			"fileRef" = "000000000000000000000079";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000068" = {
+			"path" = "Sources/MaschineryCore/Analysis.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000091" = {
+			"fileRef" = "000000000000000000000073";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000AF" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = (
+				"0000000000000000000000AC",
+				"0000000000000000000000AD",
+				"0000000000000000000000AE",
+			);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"0000000000000000000000A4" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = (
+				"0000000000000000000000A3",
+			);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"00000000000000000000008C" = {
+			"fileRef" = "00000000000000000000006E";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000087" = {
+			"fileRef" = "000000000000000000000069";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000081" = {
+			"path" = "Resources/AppIcon.icns";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "image.icns";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000C3" = {
+			"buildConfigurationList" = "0000000000000000000000C2";
+			"targets" = (
+				"0000000000000000000000BD",
+				"0000000000000000000000A2",
+				"0000000000000000000000AB",
+			);
+			"developmentRegion" = "en";
+			"knownRegions" = (
+				"en",
+				"Base",
+			);
+			"isa" = "PBXProject";
+			"compatibilityVersion" = "Xcode 14.0";
+			"productRefGroup" = "0000000000000000000000BE";
+			"projectDirPath" = "";
+			"attributes" = {
+				"LastUpgradeCheck" = "2710";
+				"BuildIndependentTargetsInParallel" = "YES";
+			};
+			"hasScannedForEncodings" = "0";
+			"projectRoot" = "";
+			"mainGroup" = "0000000000000000000000BF";
+		};
+		"00000000000000000000007C" = {
+			"path" = "Sources/MaschineryCore/SharedContent.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000077" = {
+			"path" = "Sources/MaschineryCore/Recovery.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000071" = {
+			"path" = "Sources/MaschineryCore/Libraries.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0000000000000000000000BE" = {
+			"isa" = "PBXGroup";
+			"name" = "Products";
+			"children" = (
+				"000000000000000000000083",
+				"000000000000000000000084",
+				"000000000000000000000085",
+			);
+			"sourceTree" = "<group>";
+		};
+		"00000000000000000000D001" = {
+			"fileRef" = "00000000000000000000D000";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000B9" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SWIFT_INCLUDE_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
+				"MARKETING_VERSION" = "1.0.1";
+				"DEVELOPMENT_TEAM" = "F75CB2ST8Q";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"CURRENT_PROJECT_VERSION" = "1";
+				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.music";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "local.maschinery.app";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"DEAD_CODE_STRIPPING" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"INFOPLIST_KEY_CFBundleIconFile" = "AppIcon";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"ALWAYS_SEARCH_USER_PATHS" = "NO";
+				"SDKROOT" = "macosx";
+				"SWIFT_VERSION" = "6.0";
+				"PRODUCT_NAME" = "Maschinery";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"CLANG_ENABLE_OBJC_WEAK" = "YES";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+			};
+			"name" = "Release";
+		};
+		"0000000000000000000000B3" = {
+			"isa" = "PBXResourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = (
+				"0000000000000000000000B2",
+				"00000000000000000000D007",
+			);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"00000000000000000000009B" = {
+			"fileRef" = "00000000000000000000007D";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000006C" = {
+			"path" = "Sources/MaschineryCore/ArtworkThumbnailCache.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000096" = {
+			"fileRef" = "000000000000000000000078";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000067" = {
+			"path" = "Sources/Maschinery/SecondaryViews.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000090" = {
+			"fileRef" = "000000000000000000000072";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000D007" = {
+			"fileRef" = "00000000000000000000D006";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000AE" = {
+			"fileRef" = "000000000000000000000067";
+			"isa" = "PBXBuildFile";
+		};
+		"0000000000000000000000A9" = {
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = (
+				"0000000000000000000000A7",
+				"0000000000000000000000A8",
+			);
+		};
+		"0000000000000000000000A3" = {
+			"fileRef" = "000000000000000000000080";
+			"isa" = "PBXBuildFile";
+		};
+		"00000000000000000000008B" = {
+			"fileRef" = "00000000000000000000006D";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000086" = {
+			"fileRef" = "000000000000000000000068";
+			"isa" = "PBXBuildFile";
+		};
+		"000000000000000000000080" = {
+			"path" = "Sources/MaschineryHelper/main.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000E000" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/MaschineryCore/PermissionRepair.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000E001" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "00000000000000000000E000";
+		};
+	};
+	"rootObject" = "0000000000000000000000C3";
+}
