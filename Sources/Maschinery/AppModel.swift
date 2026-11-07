@@ -196,7 +196,8 @@ import MaschineryCore
     func install() {
         guard !busy else { return }; busy = true
         let batchSelection = selected
-        let queue = candidates.filter { selected.contains($0.id) && $0.state != .installed && (mode == .install || $0.state != .extracted) }, mode = mode, log = log
+        let mode = self.mode, log = self.log
+        let queue = candidates.filter { selected.contains($0.id) && $0.state != .installed && (mode == .install || $0.state != .extracted) }
         let shouldTrash = trashSources && mode == .install
         task = Task {
             if mode == .install && queue.contains(where: { $0.policy != .skip }) {
