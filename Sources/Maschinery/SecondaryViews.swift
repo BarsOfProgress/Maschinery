@@ -16,8 +16,7 @@ struct LibrariesView: View {
                 Text("YOUR LIBRARIES").font(.system(size: 18, weight: .bold)).tracking(1)
                 Spacer()
                 Toggle("Grid", isOn: $grid).toggleStyle(.switch)
-                Button("Refresh / Audit") { model.audit() }.disabled(model.busy)
-                Button("Refresh Catalogue") { model.refreshCatalogue() }.disabled(model.refreshingCatalogue || model.offline)
+                Button("Refresh") { model.refreshCatalogue() }.disabled(model.refreshingCatalogue || model.offline)
             }
             collectionSummary
             HStack {
@@ -185,7 +184,7 @@ struct SettingsView: View {
                     Text("3 days").tag(72.0)
                     Text("1 week").tag(168.0)
                 }
-                Text("The catalogue is checked once at launch when older than this age. Further updates use Refresh Catalogue. Missing means not detected locally; ownership is not checked.").font(.caption).foregroundStyle(.secondary)
+                Text("The catalogue is checked once at launch when older than this age. Further updates use Refresh. Missing means not detected locally; ownership is not checked.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Privileged helper") {
                 Toggle("Ask to enable the helper at launch", isOn: $model.askToEnableHelperAtLaunch)
@@ -200,7 +199,7 @@ struct SettingsView: View {
                 Text("macOS requests administrator approval in System Settings. The app never runs as root.").font(.caption).foregroundStyle(.secondary)
             }
             Section("About") {
-                Text("Maschinery · 1.0.1")
+                Text("Maschinery · 1.0.2")
                 Text("An independent utility, not affiliated with or endorsed by Native Instruments.").font(.caption).foregroundStyle(.secondary)
                 Text("Registered installation and maintenance require an Apple-signed app and approved helper. Sources stay intact until verification.").font(.caption).foregroundStyle(.secondary)
             }

@@ -7,7 +7,8 @@
 
 <img width="1369" height="967" alt="image" src="https://github.com/user-attachments/assets/0552cd71-69ff-4577-bb69-122d8207f2da" />
 
-Version 1.0.1 (build 1).
+Version 1.0.2 (build 1).
+
 
 Native SwiftUI companion for bulk Maschine library installation, extraction, auditing, repair and relocation. macOS 14+, Universal 2. Independent utility; not affiliated with or endorsed by Native Instruments.
 
@@ -57,7 +58,7 @@ Open `Maschinery.xcodeproj` for native app, core and helper targets. `Package.sw
 
 Libraries now combines the official store catalogue with local detection, with **All / Installed / Missing**, search, A–Z/Z–A sorting, dynamic completion statistics, official product links and the existing local management actions. Unlisted local libraries remain visible; missing means not detected locally and says nothing about ownership. Statistics wait for a successful local scan.
 
-A verified metadata-only baseline is bundled for offline use. A persistent catalogue is checked once at launch when its cache is older than the configured age (24 hours by default); later updates use **Refresh Catalogue**. Returning to Libraries reuses the existing local scan and catalogue. The last successful catalogue date remains visible. Invalid/incomplete refreshes preserve the previous snapshot. Official product artwork is fetched on demand and cached separately; local artwork always takes priority. No official artwork is bundled, and no NI content is changed by catalogue refreshes. See [catalogue sources, matching, caching, usage limitations and verification](docs/CATALOGUE.md).
+A verified metadata-only baseline is bundled for offline use. A persistent catalogue is checked once at launch when its cache is older than the configured age (24 hours by default); later updates use **Refresh**. Returning to Libraries reuses the existing local scan and catalogue. The last successful catalogue date remains visible. Invalid/incomplete refreshes preserve the previous snapshot. Official product artwork is fetched on demand and cached separately; local artwork always takes priority. No official artwork is bundled, and no NI content is changed by catalogue refreshes. See [catalogue sources, matching, caching, usage limitations and verification](docs/CATALOGUE.md).
 
 ## Artwork previews
 
