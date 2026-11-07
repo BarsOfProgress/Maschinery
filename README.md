@@ -1,5 +1,12 @@
 # Maschinery
 
+
+<img width="1369" height="967" alt="image" src="https://github.com/user-attachments/assets/ea57a617-df79-41e0-869d-b10be16a0ce6" />
+
+<img width="1369" height="967" alt="image" src="https://github.com/user-attachments/assets/b757cdd4-5bb8-430b-8552-7c82b695c84c" />
+
+<img width="1369" height="967" alt="image" src="https://github.com/user-attachments/assets/0552cd71-69ff-4577-bb69-122d8207f2da" />
+
 Version 1.0.1 (build 1).
 
 Native SwiftUI companion for bulk Maschine library installation, extraction, auditing, repair and relocation. macOS 14+, Universal 2. Independent utility; not affiliated with or endorsed by Native Instruments.
