@@ -10,7 +10,7 @@ The Full Install implementation is enabled. The app embeds an SMAppService launc
 
 Analysis, Extract Only, artwork, XML import, offline mode, audit and logs work without helper authorization. Registered installs and maintenance are tested against isolated filesystem roots using exactly the registration engine linked into the daemon. System authorization and root-owned filesystem behavior still require acceptance on a signed build; they are not claimed as tested here.
 
-Final development bundle: `dist/Maschinery.app`.
+Final development bundle: `dist/Maschinery.app`. Releases use a verified drag-to-Applications disk image, `Maschinery-vVERSION-macOS.dmg`; see [release instructions](docs/RELEASING.md).
 
 At launch, if the helper is not enabled, the app offers **Enable Helper…** or **Not Now**. Select **Don’t ask again** when declining to stop future reminders; restore them with **Ask to enable the helper at launch** in Settings. Enabling still requires an Apple team signature on both the app and helper.
 

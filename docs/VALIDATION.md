@@ -1,5 +1,9 @@
 # Validation evidence — 2026-10-28
 
+## DMG release packaging — 2026-11-07
+
+The shared native hdiutil packager produced `Maschinery-v1.0.1-macOS.dmg` with UDZO/zlib compression and passed `hdiutil verify`. Read-only mounting confirmed the app and exact `Applications -> /Applications` symlink; deep strict all-architecture signature verification passed inside the mounted app, and both app/helper contained x86_64 and arm64. The SHA-256 sidecar validated. The temporary packaging directory was removed, and the verification mount was detached. Existing signing configuration remains unchanged; no certificates were exported or altered and no notarization was performed. The hosted release path requires user-configured signing secrets and has not been exercised with those credentials.
+
 ## Library scan progress — 2026-11-04
 
 The Library audit previously left the shared operation fraction at zero. It now emits checked/total NI registration counts, including filtered-out records, and the interface advances the bar from those counts. Preparation uses an indeterminate indicator until the total is known. Cancellation propagates rather than completing successfully; cleanup resets progress for subsequent operations.

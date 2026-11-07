@@ -24,25 +24,9 @@ if git rev-parse --verify "refs/tags/$tag" >/dev/null 2>&1; then
   print -u2 "Tag $tag already exists; increment the app version before releasing."
   exit 1
 fi
-# An ad-hoc signature cannot authorize the privileged helper.
-app_team=""
-for executable in "$app" "$app/Contents/Library/LaunchServices/MaschineryHelper"; do
-  /usr/bin/codesign --verify --strict --all-architectures "$executable"
-  signature=$(/usr/bin/codesign -d --verbose=4 "$executable" 2>&1)
-  if ! print -r -- "$signature" | /usr/bin/grep -Eq '^Authority=(Apple Development:|Developer ID Application:)'; then
-    print -u2 'Releases require the existing Apple Development or Developer ID identity, not ad-hoc signing.'
-    exit 1
-  fi
-  team=$(print -r -- "$signature" | /usr/bin/sed -n 's/^TeamIdentifier=//p')
-  if [[ -z "$team" || "$team" == 'not set' || ( -n "$app_team" && "$team" != "$app_team" ) ]]; then
-    print -u2 'App and helper must have the same valid Apple Team ID.'
-    exit 1
-  fi
-  app_team="$team"
-done
-archive="dist/Maschinery-$version.zip"
-/usr/bin/ditto -c -k --sequesterRsrc --keepParent "$app" "$archive"
-/usr/bin/shasum -a 256 "$archive" > "$archive.sha256"
+scripts/verify-release-signatures.sh
+scripts/package-dmg.sh
+archive="dist/Maschinery-v$version-macOS.dmg"
 git push origin "$branch"
 git tag -a "$tag" "$commit" -m "Maschinery $version"
 git push origin "refs/tags/$tag"

@@ -18,3 +18,5 @@ jobs:
         run: scripts/build-app.sh
         env:
           SIGNING_IDENTITY: '-'
+      - name: Package and verify DMG
+        run: scripts/package-dmg.sh
