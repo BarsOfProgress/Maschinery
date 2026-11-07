@@ -10,7 +10,7 @@ public struct BatchReport: Codable, Sendable {
     public let items: [Item]
     public var cleanup: [String]
     public init(candidates: [ExpansionCandidate], mode: OperationMode, cleanup: [String] = []) {
-        date = Date(); appVersion = "1.0.3"; self.mode = mode; self.cleanup = cleanup
+        date = Date(); appVersion = "1.0.4"; self.mode = mode; self.cleanup = cleanup
         items = candidates.map { Item(name: $0.name, destination: $0.destination.path, state: $0.state, sources: $0.sources.map { $0.url.lastPathComponent }, warnings: $0.warnings) }
     }
 }

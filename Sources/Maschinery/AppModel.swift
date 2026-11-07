@@ -296,7 +296,7 @@ import MaschineryCore
               !Task.isCancelled, let window = NSApplication.shared.keyWindow else { return }
         let alert = NSAlert()
         alert.messageText = "Enable Full Install?"
-        alert.informativeText = "Maschinery needs its helper to install and register libraries. macOS may ask you to approve it in System Settings. You can also enable it later in Settings."
+        alert.informativeText = "Install the Full Install .pkg to set up the helper with administrator approval. Apple-signed development builds can also enable their helper in System Settings."
         alert.addButton(withTitle: "Enable Helper…")
         alert.addButton(withTitle: "Not Now")
         alert.showsSuppressionButton = true
@@ -307,7 +307,10 @@ import MaschineryCore
     }
     func enableHelper() {
         defer { checkHelper() }
-        do { try XPCPrivilegedService.enable(); SMAppService.openSystemSettingsLoginItems() }
+        do {
+            try XPCPrivilegedService.enable()
+            if !InstalledHelperTrust.isPresent { SMAppService.openSystemSettingsLoginItems() }
+        }
         catch {
             if XPCPrivilegedService.status == .requiresApproval { SMAppService.openSystemSettingsLoginItems() }
             else {
@@ -320,7 +323,26 @@ import MaschineryCore
             }
         }
     }
-    func checkHelper() { helperEnabled = XPCPrivilegedService.status == .enabled }
+    func removeHelper() {
+        guard !busy else { return }
+        do { try XPCPrivilegedService.unregisterLegacyHelper(); checkHelper() }
+        catch {
+            let alert = NSAlert()
+            alert.messageText = "Remove privileged helper"
+            alert.informativeText = error.localizedDescription
+            alert.addButton(withTitle: "OK")
+            if let window = NSApplication.shared.keyWindow { alert.beginSheetModal(for: window) }
+            else { alert.runModal() }
+        }
+    }
+    func checkHelper() {
+        helperEnabled = false
+        guard XPCPrivilegedService.status == .enabled else { return }
+        Task {
+            do { try await XPCPrivilegedService().preflight(); helperEnabled = true }
+            catch { helperEnabled = false }
+        }
+    }
     func recover() {
         guard !busy else { return }; busy = true
         task = Task {

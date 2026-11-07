@@ -195,13 +195,14 @@ struct SettingsView: View {
                 }
                 Button("Enable Helper…") { model.enableHelper() }
                 Button("Refresh Helper Status") { model.checkHelper() }
+                Button("Remove Helper…") { model.removeHelper() }.disabled(model.busy)
                 Button("Recover Interrupted Operations") { model.recover() }.disabled(model.busy)
                 Text("macOS requests administrator approval in System Settings. The app never runs as root.").font(.caption).foregroundStyle(.secondary)
             }
             Section("About") {
-                Text("Maschinery · 1.0.3")
+                Text("Maschinery · 1.0.4")
                 Text("An independent utility, not affiliated with or endorsed by Native Instruments.").font(.caption).foregroundStyle(.secondary)
-                Text("Registered installation and maintenance require an Apple-signed app and approved helper. Sources stay intact until verification.").font(.caption).foregroundStyle(.secondary)
+                Text("Registered installation and maintenance require the helper installed by the Full Install .pkg, or an approved Apple-signed helper. Sources stay intact until verification.").font(.caption).foregroundStyle(.secondary)
             }
         }.formStyle(.grouped).disabled(model.busy)
             .onAppear { model.checkHelper() }

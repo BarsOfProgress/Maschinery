@@ -7,29 +7,30 @@
 
 <img width="1369" height="967" alt="image" src="https://github.com/user-attachments/assets/0552cd71-69ff-4577-bb69-122d8207f2da" />
 
-Version 1.0.3 (build 1).
+Version 1.0.4 (build 1).
 
 
 Native SwiftUI companion for bulk Maschine library installation, extraction, auditing, repair and relocation. macOS 14+, Universal 2. Independent utility; not affiliated with or endorsed by Native Instruments.
 
 ## Install the macOS release
 
-1. Download the DMG and its SHA-256 checksum from [GitHub Releases](https://github.com/BarsOfProgress/Maschinery/releases).
-2. Open the DMG and drag **Maschinery.app** onto **Applications**, then eject the disk image.
-3. Open Maschinery from Applications. Because it is ad-hoc signed and not notarized, macOS Gatekeeper may block it.
-4. If you trust the download, after attempting to open it go to **System Settings → Privacy & Security**, scroll to **Security**, click **Open Anyway**, authenticate if prompted, then confirm **Open**. This is an exception for this app; do not disable Gatekeeper globally. See [Apple's instructions](https://support.apple.com/en-us/102445).
+For full functionality, download and open **Maschinery-vVERSION-Full-Install.pkg** from [GitHub Releases](https://github.com/BarsOfProgress/Maschinery/releases). Quit Maschinery first, including in other login sessions. The installer asks for administrator approval, installs the app in Applications and installs its root-owned helper. Open Maschinery normally afterwards. Your Mac needs no developer certificate or developer account.
 
-Analysis, Extract Only, Library browsing/catalogue/artwork, and operations that do not require the privileged helper remain available. Full Install and helper-dependent repair, removal or relocation cannot be authorized in the ad-hoc release.
+The app and helper use ad-hoc signatures with hardened runtime. The package is unsigned and not notarized, so macOS may require an explicit exception in **System Settings → Privacy & Security → Open Anyway** after the first opening attempt. See [Apple's instructions](https://support.apple.com/en-us/102445). A checksum helps verify the downloaded artifact, but does not identify its publisher; obtain the package from a source you trust.
+
+The drag-to-Applications DMG remains available for browsing, analysis and extraction. Dragging the app alone does not install the privileged helper. Full Install, registered removal, permission repair and privileged relocation require the matching Full Install package.
+
+Updates also use the installer and administrator approval. App/helper identities are pinned to the exact installed build, including both CPU architectures; replacing only the app can produce a version mismatch. Finish or recover library operations before updating. To remove the helper, quit Maschinery and open **Maschinery-vVERSION-Remove-Helper.pkg**. Libraries, NI registrations, the app and transaction journals are retained.
+
+The installer implementation is new. Automated isolated installation/rollback tests and live ad-hoc XPC authentication probes do not replace a clean-Mac administrator installation and real-library acceptance pass. See [the helper design and acceptance checklist](docs/INSTALLER-HELPER.md).
 
 ## Development build
 
-GitHub release builds use **ad-hoc signing**, require no paid Apple Developer account, and are **not Developer ID signed or notarized**. The app embeds an SMAppService launch daemon, but the existing helper security checks require an Apple Team ID and Apple-anchored signatures. **Full Install and privileged maintenance are unavailable in ad-hoc builds.** Gatekeeper approval does not enable the helper. Development builds signed with a suitable existing Apple identity retain the original helper path; see [signing details](docs/SIGNING.md). No root GUI, Terminal password prompt or sudo fallback exists.
+Builds require no paid Apple Developer account. Use `SIGNING_IDENTITY=- scripts/build-app.sh`, then `scripts/package-installer.sh` to produce the full installer and helper uninstaller. Python is used only during package construction, not on the recipient's Mac. The app never runs as root. The root setup tool accepts only fixed install/recover/remove operations, and the root daemon accepts only its existing typed library operations.
 
-Analysis, Extract Only, artwork, XML import, offline mode, audit and logs work without helper authorization. Registered installs and maintenance are tested against isolated filesystem roots using exactly the registration engine linked into the daemon. System authorization and root-owned filesystem behavior still require acceptance on a signed build; they are not claimed as tested here.
+An existing Apple-signed development build can still use the original SMAppService path. Before migrating an enabled legacy helper, choose **Settings → Remove Helper…** in a development build, then quit and run the new installer. See [signing details](docs/SIGNING.md).
 
-Final development bundle: `dist/Maschinery.app`. Releases use a verified drag-to-Applications disk image, `Maschinery-vVERSION-macOS.dmg`; see [release instructions](docs/RELEASING.md).
-
-At launch, if the helper is not enabled, the app offers **Enable Helper…** or **Not Now**. Select **Don’t ask again** when declining to stop future reminders; restore them with **Ask to enable the helper at launch** in Settings. Enabling still requires an Apple team signature on both the app and helper.
+The development bundle is `dist/Maschinery.app`. The package build does not install it or alter this Mac's system helper. See [release instructions](docs/RELEASING.md).
 
 ## Build and test
 
@@ -39,7 +40,9 @@ Requires current Xcode and Swift 6. No Python, Homebrew or downloadable runtime 
 swift build --disable-sandbox
 scripts/test-native.sh      # XCTest only; rejects zero-test runs
 scripts/test-intel.sh       # x86_64 XCTest under Rosetta on Apple Silicon
-scripts/build-app.sh        # arm64 + x86_64 app AND helper, selects a sole signing identity
+SIGNING_IDENTITY=- scripts/build-app.sh  # Universal 2 app, helper and setup tool
+scripts/package-installer.sh # Full Install and Remove Helper packages
+scripts/test-helper-trust.sh # Real XPC hash acceptance/rejection probes
 open 'dist/Maschinery.app'
 ```
 
@@ -47,7 +50,7 @@ Open `Maschinery.xcodeproj` for native app, core and helper targets. `Package.sw
 
 ## Workflows
 
-**Install:** drop ISO/PKG/library folders, or select files/folders. Analysis collects metadata across the entire batch before grouping library parts. Review artwork, sources, destinations, warnings and existing registrations. Import multiple XML files/directories or choose an explicit XML per candidate. Filter/sort/select the queue, choose batch/per-item destinations and resolve conflicts. Enable the helper in Settings for Full Install, or select Extract Only.
+**Install:** drop ISO/PKG/library folders, or select files/folders. Analysis collects metadata across the entire batch before grouping library parts. Review artwork, sources, destinations, warnings and existing registrations. Import multiple XML files/directories or choose an explicit XML per candidate. Filter/sort/select the queue, choose batch/per-item destinations and resolve conflicts. Install the matching Full Install package for privileged features, or select Extract Only.
 
 **Uninstall:** select a library in Libraries, then choose **Uninstall…**. Review its registered path and choose **Uninstall, Keep Files** or **Uninstall and Move to Trash**. The helper journals, removes and verifies the selected product’s registration plist and Service Center XML; cached artwork is retained. Content moves to native reversible Trash only after registration commits. Shared/overlapping registered content blocks Trash; choose Keep Files instead. A Trash failure reports the retained path. Unfinished registration removal uses the same launch recovery as repairs.
 

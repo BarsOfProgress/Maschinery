@@ -1,4 +1,6 @@
-# Sign and authorize the helper
+# Apple-signed development helper (legacy path)
+
+For the new certificate-free Full Install package, see [INSTALLER-HELPER.md](INSTALLER-HELPER.md). The instructions below retain the Apple-team SMAppService development option.
 
 ## Maschinery 1.0.0 rename
 
@@ -18,7 +20,7 @@ The existing login Keychain identity is `Apple Development: mefflecakes@gmail.co
 
 On 2026-11-01, identical `/usr/bin/security find-identity -v -p codesigning` commands returned zero identities inside the agent sandbox and one outside it, including when explicitly specifying the login Keychain. Both contexts used UID 501 (`mef`), HOME `/Users/mef`, and the same default/search-list Keychain. Zero results in this restricted context do not mean this Mac lacks a certificate. Retry discovery/signing outside the sandbox with permission; do not create or replace credentials to resolve this visibility issue.
 
-The runtime does not enumerate Keychains or parse certificate display names: `HelperIdentity.team()` reads `kSecCodeInfoTeamIdentifier` from the running executable's signature. An ad-hoc app has no Team ID and deliberately fails Full Install preflight. The build script formerly defaulted to ad-hoc signing whenever `SIGNING_IDENTITY` was unset, even if a certificate existed. It now selects a sole visible identity by SHA-1, or fails with instructions to select one explicitly. Ad-hoc signing requires an explicit `SIGNING_IDENTITY=-`.
+The legacy path does not enumerate Keychains or parse certificate display names: `HelperIdentity.team()` reads `kSecCodeInfoTeamIdentifier` from the running executable's signature. An ad-hoc app has no Team ID and cannot use this legacy path; it uses the separate Full Install package instead. The build script formerly defaulted to ad-hoc signing whenever `SIGNING_IDENTITY` was unset, even if a certificate existed. It now selects a sole visible identity by SHA-1, or fails with instructions to select one explicitly. Ad-hoc signing requires an explicit `SIGNING_IDENTITY=-`.
 
 1. Use the existing Apple Development identity in the login Keychain. No certificate or provisioning credential changes are needed for this build.
 2. Open `Maschinery.xcodeproj`. Select **both Maschinery and MaschineryHelper targets** → Signing & Capabilities → select the **same team** and enable automatic signing. Keep these identifiers consistent with `HelperIdentity` and the daemon plist:
@@ -73,4 +75,8 @@ To move/remove a previously authorized app, first disable its background item in
 
 ## Certificate-free GitHub distribution
 
-GitHub releases now use explicit ad-hoc signing (`SIGNING_IDENTITY=-`), with no certificate secrets or notarization. The original Apple-identity instructions above apply to development/helper-enabled builds. Ad-hoc release signatures pass integrity verification but do not satisfy the existing helper Team ID / Apple-anchor checks. Full Install and privileged maintenance are unavailable in those releases. See [release configuration and limitations](RELEASING.md).
+GitHub releases now use explicit ad-hoc signing (`SIGNING_IDENTITY=-`), with no certificate secrets or notarization. The original Apple-identity instructions above apply to development/helper-enabled builds. Ad-hoc release signatures pass integrity verification but do not satisfy the existing helper Team ID / Apple-anchor checks. Those older releases lack the installer path. New Full Install packages approve exact-build identities instead. See [release configuration and limitations](RELEASING.md).
+
+## Installer-approved ad-hoc builds (new implementation)
+
+The certificate-free **Full Install .pkg** now provides an alternative to the historical Apple-team SMAppService path above. Administrator setup installs a root-owned launch daemon and pins exact app/helper/setup hashes for both CPU architectures. This enables privileged operations without an Apple signing identity once installation is accepted. Merely dragging the app out of a DMG still does not install this helper. See [installer design, lifecycle and required acceptance](INSTALLER-HELPER.md).

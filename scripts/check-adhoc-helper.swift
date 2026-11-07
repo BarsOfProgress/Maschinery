@@ -26,4 +26,4 @@ func check(_ path: String, identifier: String) throws {
 let app = CommandLine.arguments.dropFirst().first ?? "dist/Maschinery.app"
 try check(app, identifier: "local.maschinery.app")
 try check(app + "/Contents/Library/LaunchServices/MaschineryHelper", identifier: "local.maschinery.helper")
-print("The existing team preflight and XPC trust policy cannot authorize this ad-hoc build. Raw SMAppService registration was not invoked or tested.")
+print("Apple-team trust is unavailable as expected. Full functionality uses the separate installer-approved hash policy; this check does not install or test a root daemon.")

@@ -14,7 +14,7 @@ if [[ -z "$identity" ]]; then
   if (( ${#hashes} != 1 )) || [[ -z "${hashes[1]}" ]]; then
     print -u2 'Could not select one signing identity. Set SIGNING_IDENTITY to an existing certificate SHA-1 or full name.'
     print -u2 'A sandbox can hide login Keychain identities; retry outside it before concluding a certificate is missing.'
-    print -u2 'For an intentional ad-hoc build only, set SIGNING_IDENTITY=- (Full Install unavailable).'
+    print -u2 'For an intentional ad-hoc build only, set SIGNING_IDENTITY=- (use the Full Install package for privileged features).'
     exit 1
   fi
   identity="${hashes[1]}"
@@ -46,7 +46,7 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleExecutable</key><string>Maschinery</string>
 <key>CFBundleIconFile</key><string>AppIcon</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.0.3</string>
+<key>CFBundleShortVersionString</key><string>1.0.4</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>NSHighResolutionCapable</key><true/>
@@ -54,8 +54,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 </dict></plist>
 PLIST
 if [[ "$identity" == '-' ]]; then
-  codesign --force --preserve-metadata=entitlements --sign - --identifier local.maschinery.helper "$app/Contents/Library/LaunchServices/MaschineryHelper"
-  codesign --force --preserve-metadata=entitlements --sign - --identifier local.maschinery.app "$app"
+  codesign --force --preserve-metadata=entitlements --options runtime --sign - --identifier local.maschinery.helper "$app/Contents/Library/LaunchServices/MaschineryHelper"
+  codesign --force --preserve-metadata=entitlements --options runtime --sign - --identifier local.maschinery.app "$app"
 else
   codesign --force --preserve-metadata=entitlements --options runtime --timestamp --sign "$identity" "${keychain_args[@]}" --identifier local.maschinery.helper "$app/Contents/Library/LaunchServices/MaschineryHelper"
   codesign --force --preserve-metadata=entitlements --options runtime --timestamp --sign "$identity" "${keychain_args[@]}" "$app"
@@ -63,3 +63,12 @@ fi
 codesign --verify --deep --strict --verbose=2 --all-architectures "$app"
 lipo -archs "$app/Contents/Library/LaunchServices/MaschineryHelper"
 lipo -archs "$app/Contents/MacOS/Maschinery"
+
+# The setup executable is only run by administrator-authorized package scripts.
+lipo -create "$armbin/MaschinerySetup" "$intelbin/MaschinerySetup" -output dist/MaschinerySetup
+if [[ "$identity" == '-' ]]; then
+  codesign --force --options runtime --sign - --identifier local.maschinery.setup dist/MaschinerySetup
+else
+  codesign --force --options runtime --timestamp --sign "$identity" "${keychain_args[@]}" --identifier local.maschinery.setup dist/MaschinerySetup
+fi
+codesign --verify --strict --all-architectures dist/MaschinerySetup

@@ -4,6 +4,7 @@ import ServiceManagement
 
 public enum HelperIdentity {
     public static let app = "local.maschinery.app"
+    public static let setup = "local.maschinery.setup"
     public static let service = "local.maschinery.helper"
     public static let plist = service + ".plist"
     public static func team() throws -> String {
@@ -12,10 +13,13 @@ public enum HelperIdentity {
               SecCodeCopyStaticCode(code, [], &staticCode) == errSecSuccess, let staticCode,
               SecCodeCopySigningInformation(staticCode, SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
               let dict = info as? [String: Any], let team = dict[kSecCodeInfoTeamIdentifier as String] as? String,
-              team.range(of: #"^[A-Z0-9]{10}$"#, options: .regularExpression) != nil else { throw MaschineryError.unavailable("Sign the app and embedded helper with the same Apple Development or Developer ID team. Ad-hoc signatures cannot authorize Full Install.") }
+              team.range(of: #"^[A-Z0-9]{10}$"#, options: .regularExpression) != nil else { throw MaschineryError.unavailable("Install the Full Install .pkg to authorize the helper without an Apple certificate. Apple-signed development builds must use the same team for the app and helper.") }
         return team
     }
-    public static func requirement(identifier: String) throws -> String { "anchor apple generic and identifier \"\(identifier)\" and certificate leaf[subject.OU] = \"\(try team())\"" }
+    public static func requirement(identifier: String) throws -> String {
+        if InstalledHelperTrust.isPresent { return try InstalledHelperTrust.load().requirement(identifier: identifier) }
+        return "anchor apple generic and identifier \"\(identifier)\" and certificate leaf[subject.OU] = \"\(try team())\""
+    }
 }
 @objc public protocol RegistrationXPC {
     func perform(_ data: Data, reply: @escaping @Sendable (Data?, String?) -> Void)
@@ -36,15 +40,34 @@ public struct HelperResponse: Codable, Sendable {
 }
 public struct XPCPrivilegedService: PrivilegedService {
     public init() {}
-    public static var status: SMAppService.Status { SMAppService.daemon(plistName: HelperIdentity.plist).status }
+    public static var status: SMAppService.Status {
+        if InstalledHelperTrust.isPresent {
+            do { try InstalledHelperTrust.load().validateCurrentApp(); return .enabled }
+            catch { return .notFound }
+        }
+        return SMAppService.daemon(plistName: HelperIdentity.plist).status
+    }
     public static func enable() throws {
-        _ = try HelperIdentity.team()
+        if InstalledHelperTrust.isPresent {
+            try InstalledHelperTrust.load().validateCurrentApp()
+            return
+        }
+        guard (try? HelperIdentity.team()) != nil else {
+            throw MaschineryError.unavailable("Install Maschinery using its Full Install .pkg, then reopen it from Applications. The installer asks for administrator approval and sets up the helper without an Apple developer certificate.")
+        }
         if status == .enabled || status == .requiresApproval { return }
         try SMAppService.daemon(plistName: HelperIdentity.plist).register()
     }
+    public static func unregisterLegacyHelper() throws {
+        guard !InstalledHelperTrust.isPresent else {
+            throw MaschineryError.unavailable("Quit Maschinery and open the Remove Helper .pkg to remove the installed helper. Your libraries and recovery journals are retained.")
+        }
+        try SMAppService.daemon(plistName: HelperIdentity.plist).unregister()
+    }
     public func preflight() async throws {
-        _ = try HelperIdentity.team()
-        guard Self.status == .enabled else { throw MaschineryError.unavailable("Enable Maschinery’s helper in Settings, then approve it in System Settings → General → Login Items & Extensions.") }
+        if InstalledHelperTrust.isPresent { try InstalledHelperTrust.load().validateCurrentApp() }
+        else { _ = try HelperIdentity.team() }
+        guard Self.status == .enabled else { throw MaschineryError.unavailable("Install the matching Full Install .pkg, or enable the Apple-signed helper in Settings.") }
         _ = try await send(HelperMessage(.ping))
     }
     public func repairPermissions(_ request: PermissionRepairRequest) async throws {
@@ -63,7 +86,13 @@ public struct XPCPrivilegedService: PrivilegedService {
     public func swapShared(_ request: SharedContentRequest) async throws { _ = try await send(HelperMessage(.swapShared, transaction: request.transaction, sharedContent: request)) }
     public func restoreShared(_ request: SharedContentRequest) async throws { _ = try await send(HelperMessage(.restoreShared, transaction: request.transaction, sharedContent: request)) }
     public func cleanupShared(_ request: SharedContentRequest) async throws { _ = try await send(HelperMessage(.cleanupShared, transaction: request.transaction, sharedContent: request)) }
-    private func send(_ message: HelperMessage) async throws -> HelperResponse {
+    /// The root installer can only ping; it cannot perform library operations.
+    public func installationHealthCheck() async throws {
+        guard geteuid() == 0 else { throw MaschineryError.invalid("Installer health check requires root") }
+        try InstalledHelperTrust.load().validateCurrentExecutable(identifier: HelperIdentity.setup)
+        _ = try await send(HelperMessage(.ping), timeout: 10)
+    }
+    private func send(_ message: HelperMessage, timeout: Double = 120) async throws -> HelperResponse {
         let connection = NSXPCConnection(machServiceName: HelperIdentity.service, options: .privileged)
         connection.remoteObjectInterface = NSXPCInterface(with: RegistrationXPC.self)
         connection.setCodeSigningRequirement(try HelperIdentity.requirement(identifier: HelperIdentity.service))
@@ -78,7 +107,7 @@ public struct XPCPrivilegedService: PrivilegedService {
                 else if let data { do { completion.resolve(.success(try JSONDecoder().decode(HelperResponse.self, from: data))) } catch { completion.resolve(.failure(error)) } }
                 else { completion.resolve(.failure(MaschineryError.invalid("Empty helper response"))) }
             }
-            DispatchQueue.global().asyncAfter(deadline: .now() + 120) { completion.resolve(.failure(MaschineryError.unavailable("Helper timed out. Recovery will check the durable transaction before making further changes."))) }
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { completion.resolve(.failure(MaschineryError.unavailable("Helper timed out. Recovery will check the durable transaction before making further changes."))) }
         }
     }
 }

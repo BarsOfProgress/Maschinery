@@ -22,7 +22,7 @@ import MaschineryCore
                 Button("Bulk XML Import…") { model.choose(xml: true) }
             }
             CommandGroup(replacing: .appInfo) { Button("About Maschinery") {
-                NSApplication.shared.orderFrontStandardAboutPanel(options: [.applicationName: "Maschinery", .applicationVersion: "1.0.3", .credits: NSAttributedString(string: "Independent utility. Not affiliated with or endorsed by Native Instruments.\nFull Install uses an approved, signed privileged helper.")])
+                NSApplication.shared.orderFrontStandardAboutPanel(options: [.applicationName: "Maschinery", .applicationVersion: "1.0.4", .credits: NSAttributedString(string: "Independent utility. Not affiliated with or endorsed by Native Instruments.\nFull Install uses an administrator-approved privileged helper.")])
             } }
             CommandGroup(after: .windowArrangement) { Button("Logs") { model.page = "Logs" }.keyboardShortcut("l") }
         }
@@ -62,7 +62,7 @@ struct MainView: View {
                     }.buttonStyle(.plain).padding(.bottom, 4)
                 }
                 Spacer()
-                Text("MASCHINERY\n1.0.3").font(.system(size: 10)).foregroundStyle(.secondary).lineSpacing(5).padding(.bottom, 22)
+                Text("MASCHINERY\n1.0.4").font(.system(size: 10)).foregroundStyle(.secondary).lineSpacing(5).padding(.bottom, 22)
             }.padding(.horizontal, 20).frame(width: 190).background(panel)
             Rectangle().fill(Color(white: 0.18)).frame(width: 1)
             VStack(spacing: 0) {
@@ -125,7 +125,7 @@ struct InstallView: View {
                     Text("Install your Maschine expansions without Native Access. Add your expansion files, choose where they go, and let Maschinery install, register and verify your libraries.").foregroundStyle(.secondary).font(.system(size: 13))
                         .lineLimit(nil).fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Label("Full Install requires the signed helper. Enable it in Settings.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary)
+                    Label("Full Install requires the helper. Install the Full Install .pkg or see Settings.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary)
                 }.padding(24).frame(maxWidth: .infinity, alignment: .leading).background(panel)
                 Spacer()
             } else {

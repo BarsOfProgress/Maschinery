@@ -1,5 +1,18 @@
 # Validation evidence — 2026-10-28
 
+
+## Certificate-free installer implementation — 2026-11-07
+
+The new 1.0.4 implementation builds a Universal 2 app, daemon and native setup executable with ad-hoc signatures and hardened runtime. The full installer installs root-owned launchd configuration and pins app/helper/setup CodeDirectory hashes for both architectures; the helper-removal package retains the app, NI content, registrations and transaction journals. The legacy Apple-team SMAppService option remains available.
+
+Native XCTest and Intel/Rosetta XCTest each ran 130 cases: 129 passed, one existing opt-in live catalogue test skipped, zero failures. Nineteen new cases cover protected trust-file ownership/modes/ACLs, symlink/hardlink/FIFO/size rejection, malformed identities, role separation, isolated install/update/uninstall, failure at each replacement, failed startup rollback, interrupted recovery, committed cleanup interruption, running-app/pending-journal refusal, payload links and real codesign requirement parsing. The setup fixtures replace system service management and peer signature verification; a separate case invokes the production codesign verification function against a system executable.
+
+A real hardened, ad-hoc signed NSXPC probe passed natively and under Intel/Rosetta: matching peer hashes were accepted; wrong helper and wrong client hashes were rejected. This is an anonymous XPC fixture, not a root launch daemon installation.
+
+The native Xcode Release app/core/helper build succeeded for arm64 and x86_64. The Universal bundle/setup build and deep/strict signature verification passed. Full Install and Remove Helper packages were generated without signing credentials. Read-only package expansion verified root:wheel payload ownership, protected modes, disabled bundle relocation, matching script/setup binaries, expected daemon configuration, Universal architectures and every pinned app/helper/setup signature. Both SHA-256 sidecars validated.
+
+No system helper was installed, unregistered or replaced on this Mac, and no real NI content or records were modified. Administrator installation, system launchd/XPC health checks, Gatekeeper/background-item behavior and real-library operations remain pending on a disposable clean Mac. See INSTALLER-HELPER.md. These are acceptance limits, not claimed successes.
+
 ## Ad-hoc release distribution — 2026-11-07
 
 A full Universal 2 Release build completed using `SIGNING_IDENTITY=-`, with helper signed before app and entitlements retained on re-signing. Deep strict verification and per-architecture checks passed for both binaries, including expected identifiers and ad-hoc signature type. Native XCTest: 111 started, 110 passed, one live-store test skipped, zero failures. UDZO creation, `hdiutil verify` and checksum generation passed.

@@ -5,6 +5,26 @@
 	"objectVersion" = "56";
 	"archiveVersion" = "1";
 	"objects" = {
+		"00000000000000000000F102" = {
+			"path" = "Sources/MaschineryCore/HelperSetupInstaller.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000F103" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "00000000000000000000F102";
+		};
+		"00000000000000000000F100" = {
+			"path" = "Sources/MaschineryCore/InstalledHelper.swift";
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000F101" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "00000000000000000000F100";
+		};
 		"0000000000000000000000C2" = {
 			"defaultConfigurationIsVisible" = "0";
 			"defaultConfigurationName" = "Release";
@@ -63,7 +83,7 @@
 			"isa" = "XCBuildConfiguration";
 			"buildSettings" = {
 				"SWIFT_INCLUDE_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
-				"MARKETING_VERSION" = "1.0.3";
+				"MARKETING_VERSION" = "1.0.4";
 				"DEVELOPMENT_TEAM" = "F75CB2ST8Q";
 				"ONLY_ACTIVE_ARCH" = "NO";
 				"CURRENT_PROJECT_VERSION" = "1";
@@ -444,6 +464,8 @@
 				"00000000000000000000008B",
 				"00000000000000000000008C",
 				"00000000000000000000008D",
+				"00000000000000000000F103",
+				"00000000000000000000F101",
 				"00000000000000000000008E",
 				"00000000000000000000008F",
 				"000000000000000000000090",
@@ -669,6 +691,8 @@
 				"00000000000000000000006D",
 				"00000000000000000000006E",
 				"00000000000000000000006F",
+				"00000000000000000000F102",
+				"00000000000000000000F100",
 				"000000000000000000000070",
 				"000000000000000000000071",
 				"000000000000000000000072",
@@ -827,7 +851,7 @@
 			"isa" = "XCBuildConfiguration";
 			"buildSettings" = {
 				"SWIFT_INCLUDE_PATHS" = "$(SRCROOT)/Sources/SafeArchive/include";
-				"MARKETING_VERSION" = "1.0.3";
+				"MARKETING_VERSION" = "1.0.4";
 				"DEVELOPMENT_TEAM" = "F75CB2ST8Q";
 				"ONLY_ACTIVE_ARCH" = "NO";
 				"CURRENT_PROJECT_VERSION" = "1";

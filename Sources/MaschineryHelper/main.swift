@@ -5,7 +5,9 @@ import Darwin
 final class Helper: NSObject, NSXPCListenerDelegate, RegistrationXPC, @unchecked Sendable {
     let engine = RegistrationEngine(locations: .system)
     func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
-        guard let requirement = try? HelperIdentity.requirement(identifier: HelperIdentity.app), connection.effectiveUserIdentifier != 0 else { return false }
+        let identifier = connection.effectiveUserIdentifier == 0 ? HelperIdentity.setup : HelperIdentity.app
+        if connection.effectiveUserIdentifier == 0 && !InstalledHelperTrust.isPresent { return false }
+        guard let requirement = try? HelperIdentity.requirement(identifier: identifier) else { return false }
         connection.setCodeSigningRequirement(requirement)
         connection.exportedInterface = NSXPCInterface(with: RegistrationXPC.self)
         connection.exportedObject = self
@@ -13,10 +15,18 @@ final class Helper: NSObject, NSXPCListenerDelegate, RegistrationXPC, @unchecked
     }
     func perform(_ data: Data, reply: @escaping @Sendable (Data?, String?) -> Void) {
         guard data.count <= 70 * 1024 * 1024 else { reply(nil, "Helper request exceeds limit"); return }
-        guard let user = NSXPCConnection.current()?.effectiveUserIdentifier, user != 0 else { reply(nil, "Missing user identity"); return }
+        guard let user = NSXPCConnection.current()?.effectiveUserIdentifier else { reply(nil, "Missing user identity"); return }
         Task {
             do {
                 let message = try JSONDecoder().decode(HelperMessage.self, from: data)
+                if user == 0 {
+                    guard message.action == .ping, message.registration == nil, message.sharedContent == nil, message.permissions == nil else {
+                        throw MaschineryError.invalid("The installer may only check helper health")
+                    }
+                    try await engine.preflight()
+                    reply(try JSONEncoder().encode(HelperResponse(phase: .absent)), nil)
+                    return
+                }
                 try await engine.authorizePermissionTransaction(message.transaction, user: user)
                 switch message.action {
                 case .repairPermissions, .verifyPermissions:
@@ -40,7 +50,7 @@ final class Helper: NSObject, NSXPCListenerDelegate, RegistrationXPC, @unchecked
         }
     }
 }
-guard geteuid() == 0 else { fputs("MaschineryHelper must be launched by its approved SMAppService daemon.\n", stderr); exit(1) }
+guard geteuid() == 0 else { fputs("MaschineryHelper must be launched by its approved launch daemon.\n", stderr); exit(1) }
 let delegate = Helper()
 let listener = NSXPCListener(machServiceName: HelperIdentity.service)
 listener.delegate = delegate
