@@ -2,7 +2,7 @@
 # Expand, inspect and verify without executing Installer scripts or touching system paths.
 set -euo pipefail
 cd "${0:A:h}/.."
-version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' dist/Maschinery.app/Contents/Info.plist)
+version=$(/usr/libexec/PlistBuddy -c 'Print :MaschineryReleaseVersion' dist/Maschinery.app/Contents/Info.plist 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' dist/Maschinery.app/Contents/Info.plist)
 workspace=$(mktemp -d "${TMPDIR:-/tmp}/Maschinery-PKG-Verify.XXXXXXXX")
 trap 'rm -rf -- "$workspace"' EXIT
 pkgutil --expand-full "dist/Maschinery-v$version-Full-Install.pkg" "$workspace/install"
@@ -20,6 +20,10 @@ for row in subprocess.check_output(['/usr/bin/lsbom', '-p', 'fmug', str(root/'in
     assert int(mode, 8) & 0o022 == 0, f'Writable payload: {name}'
 remove_info = ET.parse(root/'remove/PackageInfo').getroot()
 assert remove_info.attrib['auth'] == 'root'
+with (payload/'Maschinery.app/Contents/Info.plist').open('rb') as f: app_info = plistlib.load(f)
+release_version = app_info.get('MaschineryReleaseVersion', app_info['CFBundleShortVersionString'])
+assert app_info['CFBundleShortVersionString'] == release_version.split('r')[0]
+assert info.attrib['version'] == release_version.replace('r', '.')
 trust = json.loads((payload/'InstalledHelper/trust.json').read_text())
 assert trust['version'] == 1
 peers = [(payload/'Maschinery.app', 'appHashes', 'local.maschinery.app'),

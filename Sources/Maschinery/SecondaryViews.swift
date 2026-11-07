@@ -194,7 +194,7 @@ struct SettingsView: View {
                 }
             }
             Section("About") {
-                Text("Maschinery · 1.0.5")
+                Text("Maschinery · 1.0.5r1")
                 Text("An independent utility, not affiliated with or endorsed by Native Instruments.").font(.caption).foregroundStyle(.secondary)
                 Text("Install Maschinery using the full installer to enable installation and maintenance. Sources stay intact until verification.").font(.caption).foregroundStyle(.secondary)
             }

@@ -17,8 +17,8 @@ commit=$(git rev-parse HEAD)
 scripts/test-native.sh
 scripts/build-app.sh
 app='dist/Maschinery.app'
-version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")
-[[ "$version" =~ '^[0-9]+\.[0-9]+\.[0-9]+$' ]] || { print -u2 'Invalid app version'; exit 1; }
+version=$(/usr/libexec/PlistBuddy -c 'Print :MaschineryReleaseVersion' "$app/Contents/Info.plist" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")
+[[ "$version" =~ '^[0-9]+\.[0-9]+\.[0-9]+(r[1-9][0-9]*)?$' ]] || { print -u2 'Invalid app version'; exit 1; }
 tag="v$version"
 if git rev-parse --verify "refs/tags/$tag" >/dev/null 2>&1; then
   print -u2 "Tag $tag already exists; increment the app version before releasing."

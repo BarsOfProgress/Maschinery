@@ -8,7 +8,7 @@
 <img width="1112" height="800" alt="image" src="https://github.com/user-attachments/assets/5fe760f3-e111-485c-a897-8e848783a26b" />
 
 
-Version 1.0.5 (build 1).
+Version 1.0.5r1 (build 2).
 
 
 Native SwiftUI companion for bulk Maschine library installation, extraction, auditing, repair and relocation. macOS 14+, Universal 2. Independent utility; not affiliated with or endorsed by Native Instruments.

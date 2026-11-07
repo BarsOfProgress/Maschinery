@@ -30,7 +30,7 @@ jobs:
       - name: Validate release tag
         shell: bash
         run: |
-          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 1
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(r[1-9][0-9]*)?$ ]] || exit 1
           test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$(git rev-parse HEAD)"
       - name: Run XCTest
         run: scripts/test-native.sh
@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           scripts/verify-release-signatures.sh
-          version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' dist/Maschinery.app/Contents/Info.plist)
+          version=$(/usr/libexec/PlistBuddy -c 'Print :MaschineryReleaseVersion' dist/Maschinery.app/Contents/Info.plist 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' dist/Maschinery.app/Contents/Info.plist)
           test "$RELEASE_TAG" = "v$version"
       - name: Check absence of Apple-team trust
         run: swift scripts/check-adhoc-helper.swift dist/Maschinery.app

@@ -125,7 +125,7 @@ import MaschineryCore
         for i in candidates.indices { candidates[i].destination = url.appendingPathComponent(ProductName.display(candidates[i].name)) }
     }
     func analyze(_ urls: [URL]) {
-        guard !busy else { return }; busy = true; status = "Analysing sources · collecting metadata across the batch"
+        guard !busy else { return }; busy = true; status = "Analysing metadata, please wait..."
         let destination = URL(fileURLWithPath: destination), explicit = explicit, offline = offline, log = log, hints = hints
         task = Task {
             do {

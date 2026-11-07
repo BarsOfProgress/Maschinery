@@ -7,8 +7,9 @@ setup="$PWD/dist/MaschinerySetup"
 [[ -d "$app" && -f "$setup" ]] || { print -u2 'Run scripts/build-app.sh first.'; exit 1; }
 codesign --verify --deep --strict --all-architectures "$app"
 codesign --verify --strict --all-architectures "$setup"
-version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")
-[[ "$version" =~ '^[0-9]+\.[0-9]+\.[0-9]+$' ]] || exit 1
+version=$(/usr/libexec/PlistBuddy -c 'Print :MaschineryReleaseVersion' "$app/Contents/Info.plist" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")
+[[ "$version" =~ '^[0-9]+\.[0-9]+\.[0-9]+(r[1-9][0-9]*)?$' ]] || exit 1
+package_version="${version/r/.}"
 workspace=$(mktemp -d "${TMPDIR:-/tmp}/Maschinery-PKG.XXXXXXXX")
 trap 'rm -rf -- "$workspace"' EXIT
 payload="$workspace/root/Library/Application Support/Maschinery/InstallerPayload"
@@ -83,10 +84,10 @@ pin(components)
 with open(path, 'wb') as f: plistlib.dump(components, f)
 PYCOMPONENTS
 /usr/bin/pkgbuild --root "$workspace/root" --component-plist "$workspace/components.plist" --scripts "$workspace/scripts" \
-  --identifier local.maschinery.full-install --version "$version" --ownership recommended \
+  --identifier local.maschinery.full-install --version "$package_version" --ownership recommended \
   --install-location / "dist/Maschinery-v$version-Full-Install.pkg"
 /usr/bin/pkgbuild --nopayload --scripts "$workspace/uninstall-scripts" \
-  --identifier local.maschinery.remove-helper --version "$version" \
+  --identifier local.maschinery.remove-helper --version "$package_version" \
   "dist/Maschinery-v$version-Remove-Helper.pkg"
 for artifact in "dist/Maschinery-v$version-Full-Install.pkg" "dist/Maschinery-v$version-Remove-Helper.pkg"; do
   (cd dist && shasum -a 256 "${artifact:t}" > "${artifact:t}.sha256")

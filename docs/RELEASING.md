@@ -45,3 +45,5 @@ This runs the local build/verification/package flow, pushes the branch and annot
 ## Gatekeeper
 
 Users who trust the download may need to attempt opening the package, then approve it through System Settings → Privacy & Security → Open Anyway. See [Apple's instructions](https://support.apple.com/en-us/102445). No global security changes are required. A checksum detects accidental corruption but does not establish publisher identity. Obtain the unsigned package from a trusted source.
+
+Revision labels such as `1.0.5r1` use `MaschineryReleaseVersion` for the displayed label, tag and artifact filename. The macOS short version stays numeric (`1.0.5`) with an increased build number; Installer uses numeric package version `1.0.5.1`. Packaging and tag checks support this mapping.
