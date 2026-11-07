@@ -1,11 +1,12 @@
 # Maschinery
 
 
-<img width="1369" height="967" alt="image" src="https://github.com/user-attachments/assets/ea57a617-df79-41e0-869d-b10be16a0ce6" />
+<img width="1112" height="800" alt="image" src="https://github.com/user-attachments/assets/6790f362-c716-41eb-88eb-e79b82025ec6" />
 
-<img width="1369" height="967" alt="image" src="https://github.com/user-attachments/assets/b757cdd4-5bb8-430b-8552-7c82b695c84c" />
+<img width="1112" height="800" alt="image" src="https://github.com/user-attachments/assets/371a49f0-0826-4590-9c6e-c1fb49d2cbc6" />
 
-<img width="1369" height="967" alt="image" src="https://github.com/user-attachments/assets/0552cd71-69ff-4577-bb69-122d8207f2da" />
+<img width="1112" height="800" alt="image" src="https://github.com/user-attachments/assets/5fe760f3-e111-485c-a897-8e848783a26b" />
+
 
 Version 1.0.5 (build 1).
 
