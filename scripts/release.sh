@@ -28,7 +28,7 @@ fi
 app_team=""
 for executable in "$app" "$app/Contents/Library/LaunchServices/MaschineryHelper"; do
   /usr/bin/codesign --verify --strict --all-architectures "$executable"
-  signature=$(/usr/bin/codesign -dv "$executable" 2>&1)
+  signature=$(/usr/bin/codesign -d --verbose=4 "$executable" 2>&1)
   if ! print -r -- "$signature" | /usr/bin/grep -Eq '^Authority=(Apple Development:|Developer ID Application:)'; then
     print -u2 'Releases require the existing Apple Development or Developer ID identity, not ad-hoc signing.'
     exit 1
